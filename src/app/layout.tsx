@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AISI ფეხბურთის ჩემპიონატი",
+  title: "აისის ფეხბურთის ჩემპიონატი",
   description: "ფეხბურთის ჩემპიონატის მართვა — გუნდები, მატჩები, მოთამაშეები და სხვა.",
 };
 
