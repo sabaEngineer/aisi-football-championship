@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserPlus, LogIn } from "lucide-react";
-import { ka } from "@/lib/ka";
+import { ka, getPositionLabel } from "@/lib/ka";
 
 interface UnassignedPlayer {
   id: number;
@@ -153,7 +153,7 @@ export function AddReserveButton({
                   <option value="">{ka.player.selectPlayer}</option>
                   {players.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.fullName} {p.position ? `(${p.position})` : ""}
+                      {p.fullName} {p.position ? `(${getPositionLabel(p.position)})` : ""}
                     </option>
                   ))}
                 </select>

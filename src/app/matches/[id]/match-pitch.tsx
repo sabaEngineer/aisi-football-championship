@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { ka, getPositionLabel } from "@/lib/ka";
 import { Crown, User } from "lucide-react";
 
 const FORMATION_SLOTS: { position: string; x: number; y: number }[] = [
@@ -45,6 +46,13 @@ function mirrorX(x: number): number {
 export function MatchPitch({ homeTeamName, awayTeamName, homePlayers, awayPlayers, maxPlayers }: Props) {
   const slots = getSlotsForSize(maxPlayers);
 
+  function positionMatchesSlot(playerPos: string | null, slotPos: string): boolean {
+    if (!playerPos) return false;
+    const playerCat = ka.player.positionToCategory[playerPos] ?? playerPos;
+    const slotCat = ka.player.positionToCategory[slotPos] ?? slotPos;
+    return playerCat === slotCat || playerPos === slotPos;
+  }
+
   function assignToSlots(players: PitchMember[]) {
     const withCoords = players.filter((p) => p.positionX != null && p.positionY != null);
     const withoutCoords = players.filter((p) => p.positionX == null || p.positionY == null);
@@ -52,7 +60,7 @@ export function MatchPitch({ homeTeamName, awayTeamName, homePlayers, awayPlayer
     const used = new Set<number>(withCoords.map((p) => p.id));
 
     for (let i = 0; i < slots.length; i++) {
-      const match = withoutCoords.find((p) => p.position === slots[i].position && !used.has(p.id));
+      const match = withoutCoords.find((p) => positionMatchesSlot(p.position, slots[i].position) && !used.has(p.id));
       if (match) { assignments[i] = match; used.add(match.id); }
     }
     for (let i = 0; i < slots.length; i++) {
@@ -91,7 +99,7 @@ export function MatchPitch({ homeTeamName, awayTeamName, homePlayers, awayPlayer
             {player.fullName}
           </span>
           <span className="text-[7px] sm:text-[8px] text-white/80 font-medium bg-black/40 px-1 rounded">
-            {player.position}
+            {getPositionLabel(player.position)}
           </span>
         </div>
       </div>

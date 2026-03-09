@@ -34,8 +34,8 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium hidden sm:inline">{user.fullName}</span>
-              <Badge variant="secondary" className="text-xs capitalize">
-                {user.role.toLowerCase()}
+              <Badge variant="secondary" className="text-xs">
+                {ka.common.personTypes[user.role as keyof typeof ka.common.personTypes] ?? user.role}
               </Badge>
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout} title={ka.nav.signOut}>

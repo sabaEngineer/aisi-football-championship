@@ -11,6 +11,7 @@ import { FootballPitch, type PitchPlayer } from "@/components/football-pitch";
 import { AddReserveButton } from "./add-reserve-button";
 import { LeaveTeamButton } from "./leave-team-button";
 import { EditTeamName } from "./edit-team-name";
+import { PositionSelect } from "@/components/position-select";
 import { Crown } from "lucide-react";
 import { ka } from "@/lib/ka";
 
@@ -151,7 +152,14 @@ export default async function TeamDetailPage({
                 {active.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.user.fullName}</TableCell>
-                    <TableCell>{m.position || "—"}</TableCell>
+                    <TableCell>
+                      <PositionSelect
+                        memberId={m.id}
+                        teamId={team.id}
+                        currentPosition={m.position}
+                        disabled={!isAdmin && !isCaptain}
+                      />
+                    </TableCell>
                     <TableCell>
                       {m.role === "CAPTAIN" ? (
                         <Badge className="bg-yellow-100 text-yellow-800 gap-1">
@@ -198,7 +206,14 @@ export default async function TeamDetailPage({
                 {reserve.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium">{m.user.fullName}</TableCell>
-                    <TableCell>{m.position || "—"}</TableCell>
+                    <TableCell>
+                      <PositionSelect
+                        memberId={m.id}
+                        teamId={team.id}
+                        currentPosition={m.position}
+                        disabled={!isAdmin && !isCaptain}
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {new Date(m.joinedAt).toLocaleDateString()}
                     </TableCell>

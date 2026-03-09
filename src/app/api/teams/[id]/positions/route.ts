@@ -45,7 +45,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const memberIds = parsed.data.positions.map((p) => p.memberId);
     const members = await prisma.teamMember.findMany({
-      where: { id: { in: memberIds }, teamId, status: "ACTIVE" },
+      where: {
+        id: { in: memberIds },
+        teamId,
+        status: { in: ["ACTIVE", "RESERVE"] },
+      },
     });
 
     if (members.length !== memberIds.length) {

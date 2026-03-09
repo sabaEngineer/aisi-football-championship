@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserPlus, LogIn } from "lucide-react";
-import { ka } from "@/lib/ka";
+import { ka, getPositionLabel } from "@/lib/ka";
 
 interface UnassignedPlayer {
   id: number;
@@ -110,7 +110,7 @@ export function AddToSlotDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            {ka.slot.addPlayerTitle.replace("{position}", position)}
+            {ka.slot.addPlayerTitle.replace("{position}", getPositionLabel(position))}
           </DialogTitle>
         </DialogHeader>
 
@@ -119,7 +119,7 @@ export function AddToSlotDialog({
           {canPlayerJoin && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                {ka.slot.joinAsPosition.replace("{position}", position)}
+                {ka.slot.joinAsPosition.replace("{position}", getPositionLabel(position))}
               </p>
               <Button onClick={handleJoinTeam} disabled={loading} className="w-full">
                 <LogIn className="h-4 w-4 mr-2" />
@@ -142,7 +142,7 @@ export function AddToSlotDialog({
                 </div>
               )}
               <p className="text-sm text-muted-foreground">
-                {ka.slot.selectForPosition.replace("{position}", position)}
+                {ka.slot.selectForPosition.replace("{position}", getPositionLabel(position))}
               </p>
               <select
                 value={selectedPlayer}
@@ -152,7 +152,7 @@ export function AddToSlotDialog({
                 <option value="">{ka.slot.choosePlayer}</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.fullName} {p.position ? `(${p.position})` : ""}
+                    {p.fullName} {p.position ? `(${getPositionLabel(p.position)})` : ""}
                   </option>
                 ))}
               </select>

@@ -99,7 +99,7 @@ export function StaffAssignment({ matchId, assignedStaff, availableStaff, isAdmi
                 {s.position && (
                   <Badge variant="outline" className="text-xs">{s.position}</Badge>
                 )}
-                <Badge variant="secondary" className="text-xs">{s.role}</Badge>
+                <Badge variant="secondary" className="text-xs">{ka.staff.staffRoleMap[s.role] ?? s.role}</Badge>
               </div>
               {isAdmin && (
                 <Button

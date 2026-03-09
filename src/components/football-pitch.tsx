@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Plus, User, Crown, GripVertical } from "lucide-react";
 import { AddToSlotDialog } from "./add-to-slot-dialog";
-import { ka } from "@/lib/ka";
+import { ka, getPositionLabel } from "@/lib/ka";
 
 // Landscape pitch: our goal on LEFT, opponent's goal on RIGHT.
 // SVG viewBox 105×68, container aspect-ratio matches exactly.
@@ -109,9 +109,16 @@ export function FootballPitch({
   const slotAssignments: (PitchPlayer | null)[] = slots.map(() => null);
   const assignedPlayerIds = new Set<number>(playersWithCoords.map((p) => p.id));
 
+  function positionMatchesSlot(playerPos: string | null, slotPos: string): boolean {
+    if (!playerPos) return false;
+    const playerCat = ka.player.positionToCategory[playerPos] ?? playerPos;
+    const slotCat = ka.player.positionToCategory[slotPos] ?? slotPos;
+    return playerCat === slotCat || playerPos === slotPos;
+  }
+
   for (let i = 0; i < slots.length; i++) {
     const match = playersWithoutCoords.find(
-      (p) => p.position === slots[i].position && !assignedPlayerIds.has(p.id)
+      (p) => positionMatchesSlot(p.position, slots[i].position) && !assignedPlayerIds.has(p.id)
     );
     if (match) {
       slotAssignments[i] = match;
@@ -227,7 +234,7 @@ export function FootballPitch({
           <span className="text-[9px] sm:text-[11px] font-semibold text-white text-center leading-tight max-w-[120px] sm:max-w-[160px] truncate bg-black/50 px-1.5 py-0.5 rounded">
             {player.fullName}
           </span>
-          <span className="text-[8px] sm:text-[9px] text-white/80 font-medium bg-black/40 px-1 rounded">{posLabel}</span>
+          <span className="text-[8px] sm:text-[9px] text-white/80 font-medium bg-black/40 px-1 rounded">{getPositionLabel(posLabel)}</span>
         </div>
       </div>
     );
@@ -330,7 +337,7 @@ export function FootballPitch({
                   )}>
                     {isClickable && <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 group-hover:text-white" />}
                   </div>
-                  <span className="text-[8px] sm:text-[9px] text-white/50 font-medium">{slot.position}</span>
+                  <span className="text-[8px] sm:text-[9px] text-white/50 font-medium">{getPositionLabel(slot.position)}</span>
                 </button>
               </div>
             );

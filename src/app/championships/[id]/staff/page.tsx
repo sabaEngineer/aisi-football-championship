@@ -85,7 +85,7 @@ export default async function ChampionshipStaffTab({
                 {staffList.map((s) => (
                   <TableRow key={s.user.id}>
                     <TableCell className="font-medium">{s.user.fullName}</TableCell>
-                    <TableCell className="text-muted-foreground">{s.user.position || "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{s.user.position ? (ka.staff.staffRoleMap[s.user.position] ?? s.user.position) : "—"}</TableCell>
                     <TableCell>
                       {s.assignments.map((a, i) => (
                         <span key={a.id}>
@@ -99,7 +99,7 @@ export default async function ChampionshipStaffTab({
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {[...new Set(s.assignments.map((a) => a.role))].map((role) => (
-                          <Badge key={role} variant="outline" className="text-xs">{role}</Badge>
+                          <Badge key={role} variant="outline" className="text-xs">{ka.staff.staffRoleMap[role] ?? role}</Badge>
                         ))}
                       </div>
                     </TableCell>

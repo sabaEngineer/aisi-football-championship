@@ -1,5 +1,10 @@
 export const ka = {
   common: {
+    personTypes: {
+      ADMIN: "ადმინისტრატორი",
+      PLAYER: "მოთამაშე",
+      STAFF: "პერსონალი",
+    },
     appName: "აისის ჩემპიონატი",
     appFullName: "აისის ფეხბურთის ჩემპიონატი",
     season: "სეზონი 2026",
@@ -198,6 +203,12 @@ export const ka = {
     live: "მიმდინარე",
     completed: "დასრულებული",
     cancelled: "გაუქმებული",
+    statusMap: {
+      SCHEDULED: "დაგეგმილი",
+      LIVE: "მიმდინარე",
+      COMPLETED: "დასრულებული",
+      CANCELLED: "გაუქმებული",
+    } as Record<string, string>,
   },
 
   staff: {
@@ -240,9 +251,36 @@ export const ka = {
       photographer: "ფოტოგრაფი",
       fourthOfficial: "მეოთხე მსაჯი",
     },
+    staffRoleMap: {
+      Referee: "მსაჯი",
+      "Assistant Referee": "მსაჯის ასისტენტი",
+      Doctor: "ექიმი",
+      Photographer: "ფოტოგრაფი",
+      "Fourth Official": "მეოთხე მსაჯი",
+    } as Record<string, string>,
   },
 
   player: {
+    /** 4 პოზიციის კატეგორია */
+    positionMap: {
+      GK: "მეკარე",
+      DEF: "დაცვა",
+      MID: "ნახევარდაცვა",
+      ATT: "შეტევა",
+    } as Record<string, string>,
+    /** დეტალური პოზიციიდან კატეგორიაზე გადაყვანა */
+    positionToCategory: {
+      GK: "GK",
+      CB: "DEF",
+      LB: "DEF",
+      RB: "DEF",
+      CDM: "MID",
+      CM: "MID",
+      CAM: "MID",
+      LW: "ATT",
+      RW: "ATT",
+      ST: "ATT",
+    } as Record<string, string>,
     activePlayers: "აქტიური მოთამაშეები ({n})",
     noActivePlayers: "აქტიური მოთამაშეები არ არის.",
     reservePlayers: "სათადარიგო მოთამაშეები ({n})",
@@ -312,3 +350,10 @@ export const ka = {
 } as const;
 
 export type Translations = typeof ka;
+
+/** პოზიციის ქართული ლეიბლი (4 კატეგორია: მეკარე, დაცვა, ნახევარდაცვა, შეტევა) */
+export function getPositionLabel(position: string | null | undefined): string {
+  if (!position) return "—";
+  const category = ka.player.positionToCategory[position] ?? position;
+  return ka.player.positionMap[category] ?? position;
+}

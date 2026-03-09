@@ -130,7 +130,7 @@ export default async function MatchDetailPage({
             </div>
           </div>
           <Badge className={statusColor[match.status] || "bg-white/20 text-white"}>
-            {match.status}
+            {ka.match.statusMap[match.status] ?? match.status}
           </Badge>
         </div>
         {match.winner && (

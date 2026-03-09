@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { ka, getPositionLabel } from "@/lib/ka";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -34,19 +35,19 @@ export default async function ChampionshipPlayersTab({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Active Players ({active.length})</CardTitle>
+          <CardTitle>{ka.player.activePlayers.replace("{n}", String(active.length))}</CardTitle>
         </CardHeader>
         <CardContent>
           {active.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No active players.</p>
+            <p className="text-muted-foreground text-sm">{ka.player.noActivePlayers}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Player</TableHead>
-                  <TableHead>Team</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>{ka.team.player}</TableHead>
+                  <TableHead>{ka.player.team}</TableHead>
+                  <TableHead>{ka.player.position}</TableHead>
+                  <TableHead>{ka.player.role}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -58,12 +59,12 @@ export default async function ChampionshipPlayersTab({
                         {m.team.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{m.position || m.user.position || "—"}</TableCell>
+                    <TableCell>{getPositionLabel(m.position || m.user.position)}</TableCell>
                     <TableCell>
                       {m.role === "CAPTAIN" ? (
-                        <Badge className="bg-yellow-100 text-yellow-800">Captain</Badge>
+                        <Badge className="bg-yellow-100 text-yellow-800">{ka.team.captain}</Badge>
                       ) : (
-                        <span className="text-muted-foreground">Player</span>
+                        <span className="text-muted-foreground">{ka.team.player}</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -77,15 +78,15 @@ export default async function ChampionshipPlayersTab({
       {reserve.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Reserve Players ({reserve.length})</CardTitle>
+            <CardTitle>{ka.player.reservePlayers.replace("{n}", String(reserve.length))}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Player</TableHead>
-                  <TableHead>Team</TableHead>
-                  <TableHead>Position</TableHead>
+                  <TableHead>{ka.team.player}</TableHead>
+                  <TableHead>{ka.player.team}</TableHead>
+                  <TableHead>{ka.player.position}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -97,7 +98,7 @@ export default async function ChampionshipPlayersTab({
                         {m.team.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{m.position || m.user.position || "—"}</TableCell>
+                    <TableCell>{getPositionLabel(m.position || m.user.position)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

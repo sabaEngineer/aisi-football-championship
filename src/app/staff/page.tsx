@@ -71,7 +71,7 @@ export default async function StaffListPage() {
                     <TableCell className="font-medium">{staff.fullName}</TableCell>
                     <TableCell>
                       {staff.position ? (
-                        <Badge variant="outline">{staff.position}</Badge>
+                        <Badge variant="outline">{ka.staff.staffRoleMap[staff.position || ""] ?? staff.position}</Badge>
                       ) : (
                         <span className="text-muted-foreground">&#8212;</span>
                       )}
@@ -91,7 +91,7 @@ export default async function StaffListPage() {
                           ))}
                           {staff.matchStaff.length > 3 && (
                             <Badge variant="secondary" className="text-xs">
-                              {`+${staff.matchStaff.length - 3} \u10E1\u10EE\u10D5\u10D0`}
+                              {ka.staff.more.replace("{n}", String(staff.matchStaff.length - 3))}
                             </Badge>
                           )}
                         </div>
