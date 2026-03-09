@@ -7,63 +7,181 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  PLAYER
+  STAFF
+}
+
+
+
+enum ChampionshipStatus {
+  DRAFT
+  REGISTRATION
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TeamMemberStatus {
+  ACTIVE
+  RESERVE
+  LEFT
+}
+
+enum TeamMemberRole {
+  CAPTAIN
+  PLAYER
+}
+
 enum MatchStatus {
   SCHEDULED
   LIVE
   COMPLETED
+  CANCELLED
 }
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id              Int      @id @default(autoincrement())
+  fullName        String
+  email           String   @unique
+  phone           String
+  password        String
+  role            UserRole @default(PLAYER)
+  position        String?
+  socialMediaLink String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  teamMemberships TeamMember[]
+  matchStaff      MatchStaff[]
+}
+
+// ─── Championship ────────────────────────────────────────────────────────────
+
+model Championship {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  maxTeams           Int
+  maxPlayersPerTeam  Int
+  maxReservesPerTeam Int                @default(5)
+  status             ChampionshipStatus @default(DRAFT)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  teams    Team[]
+  matches  Match[]
+  sponsors ChampionshipSponsor[]
+}
+
+// ─── Team ────────────────────────────────────────────────────────────────────
 
 model Team {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  shortName String?
-  logo      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  name           String
+  championshipId Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  players    Player[]
-  homeMatches Match[] @relation("HomeTeam")
-  awayMatches Match[] @relation("AwayTeam")
+  championship  Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  members       TeamMember[]
+  homeMatches   Match[]      @relation("HomeTeam")
+  awayMatches   Match[]      @relation("AwayTeam")
+  winnerMatches Match[]      @relation("MatchWinner")
+
+  @@unique([championshipId, name])
 }
 
-model Player {
-  id        Int      @id @default(autoincrement())
-  name      String
-  number    Int?
-  position  String?
+// ─── TeamMember (connects User to Team) ──────────────────────────────────────
+
+model TeamMember {
+  id        Int              @id @default(autoincrement())
+  userId    Int
   teamId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      TeamMemberRole   @default(PLAYER)
+  position  String?
+  positionX Float?
+  positionY Float?
+  status    TeamMemberStatus @default(ACTIVE)
+  joinedAt  DateTime         @default(now())
+  leftAt    DateTime?
 
-  team  Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  goals Goal[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
-  @@unique([teamId, number])
+  @@unique([userId, teamId])
 }
+
+// ─── Match ───────────────────────────────────────────────────────────────────
 
 model Match {
-  id         Int         @id @default(autoincrement())
-  homeTeamId Int
-  awayTeamId Int
-  homeScore  Int         @default(0)
-  awayScore  Int         @default(0)
-  date       DateTime
-  status     MatchStatus @default(SCHEDULED)
-  round      Int?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id              Int         @id @default(autoincrement())
+  championshipId  Int
+  homeTeamId      Int?
+  awayTeamId      Int?
+  homeScore       Int         @default(0)
+  awayScore       Int         @default(0)
+  round           Int?
+  bracketPosition Int?
+  winnerId        Int?
+  date            DateTime?
+  time            String?
+  location        String?
+  locationUrl     String?
+  description     String?
+  status          MatchStatus @default(SCHEDULED)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
-  homeTeam Team   @relation("HomeTeam", fields: [homeTeamId], references: [id])
-  awayTeam Team   @relation("AwayTeam", fields: [awayTeamId], references: [id])
-  goals    Goal[]
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  homeTeam     Team?        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam     Team?        @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  winner       Team?        @relation("MatchWinner", fields: [winnerId], references: [id])
+  staff        MatchStaff[]
 }
 
-model Goal {
-  id       Int  @id @default(autoincrement())
-  matchId  Int
-  playerId Int
-  minute   Int
+// ─── MatchStaff ──────────────────────────────────────────────────────────────
 
-  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  player Player @relation(fields: [playerId], references: [id])
+model MatchStaff {
+  id      Int    @id @default(autoincrement())
+  matchId Int
+  userId  Int
+  role    String
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+}
+
+// ─── Sponsor ─────────────────────────────────────────────────────────────────
+
+model Sponsor {
+  id        Int      @id @default(autoincrement())
+  name      String
+  logo      String?
+  website   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  championships ChampionshipSponsor[]
+}
+
+// ─── ChampionshipSponsor (many-to-many) ──────────────────────────────────────
+
+model ChampionshipSponsor {
+  id             Int      @id @default(autoincrement())
+  championshipId Int
+  sponsorId      Int
+  createdAt      DateTime @default(now())
+
+  championship Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  sponsor      Sponsor      @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+
+  @@unique([championshipId, sponsorId])
 }
