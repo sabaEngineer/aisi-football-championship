@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Plus, User, Crown, GripVertical } from "lucide-react";
 import { AddToSlotDialog } from "./add-to-slot-dialog";
+import { ka } from "@/lib/ka";
 
 // Landscape pitch: our goal on LEFT, opponent's goal on RIGHT.
 // SVG viewBox 105×68, container aspect-ratio matches exactly.
@@ -173,7 +174,7 @@ export function FootballPitch({
       if (!data.success) alert(data.error);
       router.refresh();
     } catch {
-      alert("Failed to save position");
+      alert(ka.pitch.failedSave);
     } finally {
       setSaving(false);
     }
@@ -244,7 +245,7 @@ export function FootballPitch({
         {saving && (
           <div className="absolute inset-0 z-30 rounded-xl bg-black/30 flex items-center justify-center">
             <span className="text-white font-semibold text-sm bg-black/50 px-4 py-2 rounded-lg">
-              Saving...
+              {ka.pitch.saving}
             </span>
           </div>
         )}
@@ -281,7 +282,7 @@ export function FootballPitch({
         {canRearrange && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
             <span className="text-white/50 text-[10px] font-medium bg-black/20 px-2 py-0.5 rounded">
-              Drag players anywhere on the pitch
+              {ka.pitch.dragHint}
             </span>
           </div>
         )}

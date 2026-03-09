@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TournamentBracket } from "@/components/tournament-bracket";
 import { MatchScoreEntry } from "./match-score-entry";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function ChampionshipMatchesTab({
       <Card>
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground">
-            No matches yet.{isAdmin ? " Go to Settings to draw the tournament bracket." : ""}
+            {ka.match.noMatches}
           </p>
         </CardContent>
       </Card>
@@ -69,7 +70,7 @@ export default async function ChampionshipMatchesTab({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Tournament Bracket</CardTitle>
+          <CardTitle>{ka.match.tournamentBracket}</CardTitle>
         </CardHeader>
         <CardContent>
           <TournamentBracket matches={bracketMatches} totalRounds={totalRounds} />
@@ -79,7 +80,7 @@ export default async function ChampionshipMatchesTab({
       {isAdmin && playableMatches.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Enter Match Results</CardTitle>
+            <CardTitle>{ka.match.enterResults}</CardTitle>
           </CardHeader>
           <CardContent>
             <MatchScoreEntry

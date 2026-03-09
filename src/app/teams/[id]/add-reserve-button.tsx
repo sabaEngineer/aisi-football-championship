@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserPlus, LogIn } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface UnassignedPlayer {
   id: number;
@@ -103,7 +104,7 @@ export function AddReserveButton({
       <div className="flex justify-center">
         <Button variant="outline" onClick={() => setOpen(true)} className="gap-2">
           <UserPlus className="h-4 w-4" />
-          Add Reserve Player ({reserveCount}/{maxReserves})
+          {`${ka.player.addReserve.replace("{n}", String(reserveCount)).replace("{max}", String(maxReserves))}`}
         </Button>
       </div>
 
@@ -112,7 +113,7 @@ export function AddReserveButton({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              Add Reserve Player
+              {ka.player.addReserveTitle}
             </DialogTitle>
           </DialogHeader>
 
@@ -120,11 +121,11 @@ export function AddReserveButton({
             {canPlayerJoin && (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Join this team as a <strong>reserve</strong> player
+                  {ka.player.joinAsReserve}
                 </p>
                 <Button onClick={handleJoin} disabled={loading} className="w-full">
                   <LogIn className="h-4 w-4 mr-2" />
-                  {loading ? "Joining..." : "Join as Reserve"}
+                  {loading ? ka.player.joining : ka.player.joinReserve}
                 </Button>
               </div>
             )}
@@ -137,19 +138,19 @@ export function AddReserveButton({
                       <span className="w-full border-t" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">or</span>
+                      <span className="bg-background px-2 text-muted-foreground">{ka.common.or}</span>
                     </div>
                   </div>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Select an unassigned player to add as reserve
+                  {ka.player.selectUnassigned}
                 </p>
                 <select
                   value={selectedPlayer}
                   onChange={(e) => setSelectedPlayer(e.target.value)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  <option value="">Choose a player...</option>
+                  <option value="">{ka.player.selectPlayer}</option>
                   {players.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.fullName} {p.position ? `(${p.position})` : ""}
@@ -157,7 +158,7 @@ export function AddReserveButton({
                   ))}
                 </select>
                 {players.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No unassigned players available.</p>
+                  <p className="text-xs text-muted-foreground">{ka.player.noUnassigned}</p>
                 )}
                 <Button
                   onClick={handleAdd}
@@ -166,7 +167,7 @@ export function AddReserveButton({
                   className="w-full"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
-                  {loading ? "Adding..." : "Add as Reserve"}
+                  {loading ? ka.staff.adding : ka.player.addAsReserve}
                 </Button>
               </div>
             )}

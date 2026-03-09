@@ -12,6 +12,7 @@ import { AddReserveButton } from "./add-reserve-button";
 import { LeaveTeamButton } from "./leave-team-button";
 import { EditTeamName } from "./edit-team-name";
 import { Crown } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -91,8 +92,8 @@ export default async function TeamDetailPage({
             <h1 className="text-3xl font-bold tracking-tight">{team.name}</h1>
           )}
           <p className="text-muted-foreground mt-1">
-            {active.length} / {team.championship.maxPlayersPerTeam} players
-            {reserve.length > 0 && ` · ${reserve.length} / ${team.championship.maxReservesPerTeam} reserves`}
+            {active.length} / {team.championship.maxPlayersPerTeam} {ka.team.playersLabel}
+            {reserve.length > 0 && ` · ${reserve.length} / ${team.championship.maxReservesPerTeam} ${ka.team.reservesLabel}`}
           </p>
         </div>
       </div>
@@ -129,20 +130,20 @@ export default async function TeamDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>
-            Squad List ({active.length} / {team.championship.maxPlayersPerTeam})
+            {`${ka.team.squadList.replace("{n}", String(active.length)).replace("{max}", String(team.championship.maxPlayersPerTeam))}`}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {active.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No players yet. Click the empty positions on the pitch above to add players.</p>
+            <p className="text-muted-foreground text-sm">{ka.team.noPlayersYet}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Player</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>{ka.team.player}</TableHead>
+                  <TableHead>{ka.team.position}</TableHead>
+                  <TableHead>{ka.team.role}</TableHead>
+                  <TableHead>{ka.team.joined}</TableHead>
                   {isAdmin && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
@@ -155,10 +156,10 @@ export default async function TeamDetailPage({
                       {m.role === "CAPTAIN" ? (
                         <Badge className="bg-yellow-100 text-yellow-800 gap-1">
                           <Crown className="h-3 w-3" />
-                          Captain
+                          {ka.team.captain}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground">Player</span>
+                        <span className="text-muted-foreground">{ka.team.player}</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
@@ -181,15 +182,15 @@ export default async function TeamDetailPage({
       {reserve.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Reserve Bench ({reserve.length} / {team.championship.maxReservesPerTeam})</CardTitle>
+            <CardTitle>{`${ka.team.reserveBench.replace("{n}", String(reserve.length)).replace("{max}", String(team.championship.maxReservesPerTeam))}`}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Player</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>{ka.team.player}</TableHead>
+                  <TableHead>{ka.team.position}</TableHead>
+                  <TableHead>{ka.team.joined}</TableHead>
                   {isAdmin && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>

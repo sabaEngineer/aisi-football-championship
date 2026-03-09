@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Shuffle } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface Props {
   championshipId: number;
@@ -70,7 +71,7 @@ export function ChampionshipSettings({
       return;
     }
 
-    setSuccess("Settings updated");
+    setSuccess(ka.settings.settingsUpdated);
     router.refresh();
   }
 
@@ -80,13 +81,13 @@ export function ChampionshipSettings({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Admin Settings
+          {ka.settings.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="text-sm font-medium">Number of Teams</label>
+            <label className="text-sm font-medium">{ka.settings.numberOfTeams}</label>
             <Input
               name="maxTeams"
               type="number"
@@ -96,7 +97,7 @@ export function ChampionshipSettings({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Players per Team</label>
+            <label className="text-sm font-medium">{ka.settings.playersPerTeam}</label>
             <Input
               name="maxPlayersPerTeam"
               type="number"
@@ -106,7 +107,7 @@ export function ChampionshipSettings({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Max Reserves per Team</label>
+            <label className="text-sm font-medium">{ka.settings.maxReservesPerTeam}</label>
             <Input
               name="maxReservesPerTeam"
               type="number"
@@ -116,21 +117,21 @@ export function ChampionshipSettings({
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Status</label>
+            <label className="text-sm font-medium">{ka.settings.status}</label>
             <select
               name="status"
               defaultValue={currentStatus}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm h-9"
             >
-              <option value="DRAFT">Draft</option>
-              <option value="REGISTRATION">Registration</option>
-              <option value="ACTIVE">Active</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
+              <option value="DRAFT">{ka.championship.status.DRAFT}</option>
+              <option value="REGISTRATION">{ka.championship.status.REGISTRATION}</option>
+              <option value="ACTIVE">{ka.championship.status.ACTIVE}</option>
+              <option value="COMPLETED">{ka.championship.status.COMPLETED}</option>
+              <option value="CANCELLED">{ka.championship.status.CANCELLED}</option>
             </select>
           </div>
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : "Save"}
+            {loading ? ka.common.saving : ka.common.save}
           </Button>
         </form>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
@@ -142,19 +143,19 @@ export function ChampionshipSettings({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shuffle className="h-5 w-5" />
-          Tournament Bracket
+          {ka.settings.tournamentBracket}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Randomly draw the bracket by shuffling teams into a knockout tournament.
-          {hasMatches && " This will replace all existing matches."}
+          {ka.settings.bracketDesc}
+          {hasMatches && ` ${ka.settings.bracketWillReplace}`}
         </p>
         <div className="flex items-center gap-4">
           <div className="text-sm">
-            <span className="font-medium">{teamCount}</span> teams registered
+            <span className="font-medium">{teamCount}</span> {ka.settings.teamsRegistered}
             {teamCount < 2 && (
-              <span className="text-destructive ml-2">(need at least 2)</span>
+              <span className="text-destructive ml-2">{ka.settings.needAtLeast2}</span>
             )}
           </div>
           <Button
@@ -162,7 +163,7 @@ export function ChampionshipSettings({
             className="bg-green-700 hover:bg-green-800"
             disabled={generating || teamCount < 2}
             onClick={async () => {
-              if (hasMatches && !confirm("This will delete all existing matches and generate a new bracket. Continue?")) return;
+              if (hasMatches && !confirm(ka.settings.confirmRedraw)) return;
               setGenerating(true);
               setError("");
               setSuccess("");
@@ -174,17 +175,17 @@ export function ChampionshipSettings({
                 if (!data.success) {
                   setError(data.error);
                 } else {
-                  setSuccess(`Bracket generated! ${data.data.count} matches across ${data.data.rounds} rounds.`);
+                  setSuccess(ka.settings.bracketGenerated.replace("{matches}", data.data.count).replace("{rounds}", data.data.rounds));
                   router.refresh();
                 }
               } catch {
-                setError("Failed to generate bracket");
+                setError(ka.settings.failedGenerate);
               }
               setGenerating(false);
             }}
           >
             <Shuffle className="h-4 w-4 mr-2" />
-            {generating ? "Generating..." : hasMatches ? "Re-draw Bracket" : "Draw Bracket"}
+            {generating ? ka.settings.generating : hasMatches ? ka.settings.redrawBracket : ka.settings.drawBracket}
           </Button>
         </div>
       </CardContent>

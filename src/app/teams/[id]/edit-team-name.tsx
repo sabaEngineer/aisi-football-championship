@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Check, X } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export function EditTeamName({ teamId, currentName }: { teamId: number; currentName: string }) {
   const router = useRouter();
@@ -40,7 +41,7 @@ export function EditTeamName({ teamId, currentName }: { teamId: number; currentN
         <button
           onClick={() => setEditing(true)}
           className="text-muted-foreground hover:text-foreground transition-colors"
-          title="Edit team name"
+          title={ka.team.editTeamName}
         >
           <Pencil className="h-4 w-4" />
         </button>

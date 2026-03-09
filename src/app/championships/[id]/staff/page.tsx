@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -56,11 +57,11 @@ export default async function ChampionshipStaffTab({
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Staff Assignments ({staffList.length} members)</CardTitle>
+          <CardTitle>{`${ka.staff.staffAssignments.replace("{n}", String(staffList.length))}`}</CardTitle>
           {isAdmin && (
             <Link href="/staff/new">
               <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />Add Staff User
+                <Plus className="h-4 w-4 mr-2" />{ka.staff.addStaffUser}
               </Button>
             </Link>
           )}
@@ -68,16 +69,16 @@ export default async function ChampionshipStaffTab({
         <CardContent>
           {staffList.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No staff assigned yet.{isAdmin ? " Assign staff from match detail pages." : ""}
+              {ka.staff.noStaffAssigned}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Staff Member</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Matches Assigned</TableHead>
-                  <TableHead>Roles</TableHead>
+                  <TableHead>{ka.staff.staffMember}</TableHead>
+                  <TableHead>{ka.staff.type}</TableHead>
+                  <TableHead>{ka.staff.matchesAssigned}</TableHead>
+                  <TableHead>{ka.staff.roles}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -90,7 +91,7 @@ export default async function ChampionshipStaffTab({
                         <span key={a.id}>
                           {i > 0 && ", "}
                           <Link href={`/matches/${a.matchId}`} className="text-primary hover:underline text-sm">
-                            {a.match.homeTeam.name} vs {a.match.awayTeam.name}
+                            {a.match.homeTeam?.name ?? ka.match.tbd} {ka.common.vs} {a.match.awayTeam?.name ?? ka.match.tbd}
                           </Link>
                         </span>
                       ))}

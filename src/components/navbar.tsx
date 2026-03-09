@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trophy, LogOut, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ka } from "@/lib/ka";
 
 interface NavbarUser {
   fullName: string;
@@ -25,7 +26,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/championships" className="flex items-center gap-2 font-bold text-lg">
           <Trophy className="h-5 w-5 text-primary" />
-          <span>AISI Championship</span>
+          <span>ჩემპიონატი</span>
         </Link>
 
         {user ? (
@@ -37,7 +38,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                 {user.role.toLowerCase()}
               </Badge>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout} title="Sign out">
+            <Button variant="ghost" size="sm" onClick={handleLogout} title={ka.nav.signOut}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -45,11 +46,11 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           <div className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="outline" size="sm">
-                <LogIn className="h-4 w-4 mr-2" />Sign In
+                <LogIn className="h-4 w-4 mr-2" />{ka.nav.signIn}
               </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm">Register</Button>
+              <Button size="sm">{ka.nav.register}</Button>
             </Link>
           </div>
         )}

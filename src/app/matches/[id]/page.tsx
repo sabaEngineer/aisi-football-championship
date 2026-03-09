@@ -7,15 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MatchPitch } from "./match-pitch";
 import { MatchInfoEditor } from "./match-info-editor";
 import { StaffAssignment } from "./staff-assignment";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
 function getRoundLabel(round: number, totalRounds: number): string {
   const fromFinal = totalRounds - round;
-  if (fromFinal === 0) return "Final";
-  if (fromFinal === 1) return "Semi-Final";
-  if (fromFinal === 2) return "Quarter-Final";
-  return `Round ${round}`;
+  if (fromFinal === 0) return ka.match.round.final;
+  if (fromFinal === 1) return ka.match.round.semiFinal;
+  if (fromFinal === 2) return ka.match.round.quarterFinal;
+  return ka.match.round.roundN.replace("{n}", String(round));
 }
 
 const statusColor: Record<string, string> = {
@@ -108,7 +109,7 @@ export default async function MatchDetailPage({
           href={`/championships/${match.championshipId}/matches`}
           className="text-sm text-muted-foreground hover:underline"
         >
-          ← Back to bracket
+          {ka.match.backToBracket}
         </Link>
       </div>
 
@@ -123,7 +124,7 @@ export default async function MatchDetailPage({
                   {match.homeScore} – {match.awayScore}
                 </span>
               ) : (
-                <span className="text-xl font-semibold text-white/60">vs</span>
+                <span className="text-xl font-semibold text-white/60">{ka.common.vs}</span>
               )}
               <span className="text-2xl font-bold text-white">{match.awayTeam.name}</span>
             </div>
@@ -134,7 +135,7 @@ export default async function MatchDetailPage({
         </div>
         {match.winner && (
           <p className="text-white/80 text-sm mt-2">
-            Winner: <span className="font-semibold text-white">{match.winner.name}</span>
+            {ka.match.winner} <span className="font-semibold text-white">{match.winner.name}</span>
           </p>
         )}
         {(match.date || match.time || match.location) && (
@@ -166,7 +167,7 @@ export default async function MatchDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Match Staff</CardTitle>
+          <CardTitle>{ka.match.matchStaff}</CardTitle>
         </CardHeader>
         <CardContent>
           <StaffAssignment

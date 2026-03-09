@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ka } from "@/lib/ka";
 
 export default function NewChampionshipPage() {
   const router = useRouter();
@@ -45,27 +46,27 @@ export default function NewChampionshipPage() {
     <div className="max-w-lg mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Create Championship</CardTitle>
+          <CardTitle>{ka.championship.createTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Championship Name</label>
-              <Input name="name" placeholder="e.g. Spring League 2026" required />
+              <label className="text-sm font-medium">{ka.championship.championshipName}</label>
+              <Input name="name" placeholder={ka.championship.championshipNamePlaceholder} required />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Max Teams</label>
+                <label className="text-sm font-medium">{ka.championship.maxTeams}</label>
                 <Input name="maxTeams" type="number" min={2} defaultValue={8} required />
               </div>
               <div>
-                <label className="text-sm font-medium">Max Players / Team</label>
+                <label className="text-sm font-medium">{ka.championship.maxPlayersTeam}</label>
                 <Input name="maxPlayersPerTeam" type="number" min={1} defaultValue={11} required />
               </div>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating..." : "Create Championship"}
+              {loading ? ka.championship.creating : ka.championship.createTitle}
             </Button>
           </form>
         </CardContent>

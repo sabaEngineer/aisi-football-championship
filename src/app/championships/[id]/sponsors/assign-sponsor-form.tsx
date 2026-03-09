@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { ka } from "@/lib/ka";
 
 interface Sponsor {
   id: number;
@@ -77,30 +78,30 @@ export function AssignSponsorForm({ championshipId }: { championshipId: number }
   return (
     <div className="space-y-4 pt-2">
       <Separator />
-      <p className="text-sm font-medium">Assign Existing Sponsor</p>
+      <p className="text-sm font-medium">{ka.sponsor.assignExisting}</p>
       <form onSubmit={handleAssign} className="flex items-end gap-3">
         <select
           value={selectedSponsor}
           onChange={(e) => setSelectedSponsor(e.target.value)}
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         >
-          <option value="">Select sponsor...</option>
+          <option value="">{ka.sponsor.selectSponsor}</option>
           {sponsors.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
         <Button type="submit" variant="outline" size="sm" disabled={loading}>
-          {loading ? "Assigning..." : "Assign"}
+          {loading ? ka.sponsor.assigning : ka.staff.assign}
         </Button>
       </form>
 
-      <p className="text-sm font-medium">Or Create New Sponsor</p>
+      <p className="text-sm font-medium">{ka.sponsor.orCreateNew}</p>
       <form onSubmit={handleCreateAndAssign} className="flex flex-wrap items-end gap-3">
         <div>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Sponsor name"
+            placeholder={ka.sponsor.sponsorName}
             required
           />
         </div>
@@ -108,12 +109,12 @@ export function AssignSponsorForm({ championshipId }: { championshipId: number }
           <Input
             value={newWebsite}
             onChange={(e) => setNewWebsite(e.target.value)}
-            placeholder="https://website.com"
+            placeholder={ka.sponsor.websitePlaceholder}
             type="url"
           />
         </div>
         <Button type="submit" variant="outline" size="sm" disabled={creatingNew}>
-          {creatingNew ? "Creating..." : "Create & Assign"}
+          {creatingNew ? ka.sponsor.creatingAssigning : ka.sponsor.createAndAssign}
         </Button>
       </form>
 

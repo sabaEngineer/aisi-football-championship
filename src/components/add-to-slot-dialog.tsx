@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserPlus, LogIn } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface UnassignedPlayer {
   id: number;
@@ -109,7 +110,7 @@ export function AddToSlotDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            Add Player — {position}
+            {ka.slot.addPlayerTitle.replace("{position}", position)}
           </DialogTitle>
         </DialogHeader>
 
@@ -118,11 +119,11 @@ export function AddToSlotDialog({
           {canPlayerJoin && (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Join this team as <strong>{position}</strong>
+                {ka.slot.joinAsPosition.replace("{position}", position)}
               </p>
               <Button onClick={handleJoinTeam} disabled={loading} className="w-full">
                 <LogIn className="h-4 w-4 mr-2" />
-                {loading ? "Joining..." : "Join this Team"}
+                {loading ? ka.slot.joining : ka.slot.joinTeam}
               </Button>
             </div>
           )}
@@ -136,19 +137,19 @@ export function AddToSlotDialog({
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or</span>
+                    <span className="bg-background px-2 text-muted-foreground">{ka.common.or}</span>
                   </div>
                 </div>
               )}
               <p className="text-sm text-muted-foreground">
-                Select an unassigned player for the <strong>{position}</strong> position
+                {ka.slot.selectForPosition.replace("{position}", position)}
               </p>
               <select
                 value={selectedPlayer}
                 onChange={(e) => setSelectedPlayer(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option value="">Choose a player...</option>
+                <option value="">{ka.slot.choosePlayer}</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.fullName} {p.position ? `(${p.position})` : ""}
@@ -156,7 +157,7 @@ export function AddToSlotDialog({
                 ))}
               </select>
               {players.length === 0 && (
-                <p className="text-xs text-muted-foreground">No unassigned players available.</p>
+                <p className="text-xs text-muted-foreground">{ka.slot.noUnassigned}</p>
               )}
               <Button
                 onClick={handleAddPlayer}
@@ -165,7 +166,7 @@ export function AddToSlotDialog({
                 className="w-full"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
-                {loading ? "Adding..." : "Add Player"}
+                {loading ? ka.slot.adding : ka.slot.addPlayer}
               </Button>
             </div>
           )}

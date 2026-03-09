@@ -10,7 +10,7 @@ export function error(message: string, status = 400) {
 }
 
 export function validationError(err: ZodError) {
-  const messages = err.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+  const messages = err.issues.map((e) => `${e.path.join(".")}: ${e.message}`);
   return error(messages.join("; "), 422);
 }
 

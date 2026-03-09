@@ -4,17 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Shield, Users, CalendarDays, UserCog, Handshake, Settings } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 const tabs = [
-  { segment: "", label: "Teams", icon: Shield },
-  { segment: "/players", label: "Players", icon: Users },
-  { segment: "/matches", label: "Matches", icon: CalendarDays },
-  { segment: "/staff", label: "Staff", icon: UserCog },
-  { segment: "/sponsors", label: "Sponsors", icon: Handshake },
+  { segment: "", label: ka.tabs.teams, icon: Shield },
+  { segment: "/players", label: ka.tabs.players, icon: Users },
+  { segment: "/matches", label: ka.tabs.matches, icon: CalendarDays },
+  { segment: "/staff", label: ka.tabs.staff, icon: UserCog },
+  { segment: "/sponsors", label: ka.tabs.sponsors, icon: Handshake },
 ];
 
 const adminTabs = [
-  { segment: "/settings", label: "Settings", icon: Settings },
+  { segment: "/settings", label: ka.tabs.settings, icon: Settings },
 ];
 
 export function ChampionshipTabs({

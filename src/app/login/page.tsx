@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ka } from "@/lib/ka";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,11 +69,11 @@ export default function LoginPage() {
           <div className="relative z-10 flex flex-col items-center justify-center w-full px-12 text-center">
             <Trophy className="h-16 w-16 text-white/90 mb-6" />
             <h2 className="text-4xl font-extrabold text-white leading-tight">
-              AISI Football
-              <span className="block text-green-300">Championship</span>
+              {ka.auth.loginHeroTitle}
+              <span className="block text-green-300">{ka.auth.loginHeroSubtitle}</span>
             </h2>
             <p className="mt-4 text-white/60 text-lg max-w-sm">
-              The heart of Georgian football. Join the game, lead your team, chase the glory.
+              {ka.auth.loginHeroDesc}
             </p>
 
             <p className="mt-6 text-white/30 text-sm tracking-[0.2em] uppercase font-medium">
@@ -91,19 +92,19 @@ export default function LoginPage() {
                   <Trophy className="h-7 w-7 text-white" />
                 </div>
               </div>
-              <h1 className="text-2xl font-bold">AISI Championship</h1>
+              <h1 className="text-2xl font-bold">{ka.common.appName}</h1>
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+              <h1 className="text-3xl font-bold tracking-tight">{ka.auth.loginTitle}</h1>
               <p className="text-muted-foreground mt-2">
-                Sign in to your account to continue
+                {ka.auth.loginSubtitle}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Phone Number</label>
+                <label className="text-sm font-medium">{ka.auth.phone}</label>
                 <Input
                   name="phone"
                   type="tel"
@@ -113,11 +114,11 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Password</label>
+                <label className="text-sm font-medium">{ka.auth.password}</label>
                 <Input
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={ka.auth.passwordPlaceholder}
                   required
                   className="h-11"
                 />
@@ -130,7 +131,7 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" size="lg" className="w-full h-12 bg-green-700 hover:bg-green-800 text-base font-semibold" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? ka.auth.signingIn : ka.auth.signIn}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </form>
@@ -138,14 +139,14 @@ export default function LoginPage() {
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t" /></div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-3 text-muted-foreground">or</span>
+                <span className="bg-background px-3 text-muted-foreground">{ka.common.or}</span>
               </div>
             </div>
 
             <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              {ka.auth.noAccount}{" "}
               <Link href="/register" className="text-green-700 font-semibold hover:underline">
-                Create Account
+                {ka.auth.createAccount}
               </Link>
             </p>
           </div>

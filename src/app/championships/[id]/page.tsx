@@ -8,6 +8,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Plus } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -43,27 +44,27 @@ export default async function ChampionshipTeamsTab({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
-          Teams ({championship.teams.length} / {championship.maxTeams})
+          {`${ka.tabs.teams} (${championship.teams.length} / ${championship.maxTeams})`}
         </CardTitle>
         {isAdmin && championship.teams.length < championship.maxTeams && (
           <Link href={`/teams/new?championshipId=${championship.id}`}>
             <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />Add Team
+              <Plus className="h-4 w-4 mr-2" />{ka.team.addTeam}
             </Button>
           </Link>
         )}
       </CardHeader>
       <CardContent>
         {championship.teams.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No teams yet.</p>
+          <p className="text-muted-foreground text-sm">{ka.team.noTeams}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Team</TableHead>
-                <TableHead>Active Players</TableHead>
-                <TableHead>Reserve</TableHead>
-                <TableHead>Captain</TableHead>
+                <TableHead>{ka.team.teamName}</TableHead>
+                <TableHead>{ka.team.activePlayers}</TableHead>
+                <TableHead>{ka.team.reserve}</TableHead>
+                <TableHead>{ka.team.captain}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -82,7 +83,7 @@ export default async function ChampionshipTeamsTab({
                       {activeCount} / {championship.maxPlayersPerTeam}
                     </TableCell>
                     <TableCell>{reserveCount}</TableCell>
-                    <TableCell>{captain?.user.fullName || "—"}</TableCell>
+                    <TableCell>{captain?.user.fullName || "\u2014"}</TableCell>
                   </TableRow>
                 );
               })}

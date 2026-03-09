@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AssignSponsorForm } from "./assign-sponsor-form";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -29,11 +30,11 @@ export default async function ChampionshipSponsorsTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sponsors ({championshipSponsors.length})</CardTitle>
+        <CardTitle>{ka.sponsor.title.replace("{n}", String(championshipSponsors.length))}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {championshipSponsors.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No sponsors assigned.</p>
+          <p className="text-muted-foreground text-sm">{ka.sponsor.noSponsors}</p>
         ) : (
           <div className="flex flex-wrap gap-3">
             {championshipSponsors.map((cs) => (
@@ -46,7 +47,7 @@ export default async function ChampionshipSponsorsTab({
                     rel="noopener noreferrer"
                     className="text-xs text-primary hover:underline"
                   >
-                    website
+                    {ka.common.website}
                   </a>
                 )}
               </div>

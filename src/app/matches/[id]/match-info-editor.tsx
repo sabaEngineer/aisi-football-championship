@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pencil, Check, X, MapPin, Clock, Calendar, FileText, ExternalLink } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface Props {
   matchId: number;
@@ -65,7 +66,7 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
         router.refresh();
       }
     } catch {
-      setError("Failed to save");
+      setError(ka.match.failedToSave);
     }
     setSaving(false);
   }
@@ -86,17 +87,17 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Match Info</CardTitle>
+          <CardTitle>{ka.match.matchInfo}</CardTitle>
           {isAdmin && (
             <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="h-4 w-4 mr-1" />Edit
+              <Pencil className="h-4 w-4 mr-1" />{ka.common.edit}
             </Button>
           )}
         </CardHeader>
         <CardContent>
           {!hasInfo ? (
             <p className="text-muted-foreground text-sm">
-              No match details set yet.{isAdmin ? " Click Edit to add date, time, location and description." : ""}
+              {ka.match.noMatchDetails}
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -122,7 +123,7 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
                       rel="noopener noreferrer"
                       className="text-green-700 hover:underline flex items-center gap-1"
                     >
-                      {location || "View on Map"}
+                      {location || ka.match.viewOnMap}
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   ) : (
@@ -146,7 +147,7 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
   return (
     <Card className="border-green-200">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Edit Match Info</CardTitle>
+        <CardTitle>{ka.match.editMatchInfo}</CardTitle>
         <div className="flex gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSave} disabled={saving}>
             <Check className="h-4 w-4 text-green-600" />
@@ -161,7 +162,7 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5 mb-1">
-              <Calendar className="h-3.5 w-3.5" />Date
+              <Calendar className="h-3.5 w-3.5" />{ka.match.date}
             </label>
             <Input
               type="date"
@@ -171,7 +172,7 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5 mb-1">
-              <Clock className="h-3.5 w-3.5" />Time
+              <Clock className="h-3.5 w-3.5" />{ka.match.time}
             </label>
             <Input
               type="time"
@@ -181,39 +182,39 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5 mb-1">
-              <MapPin className="h-3.5 w-3.5" />Location
+              <MapPin className="h-3.5 w-3.5" />{ka.match.location}
             </label>
             <Input
               value={formLocation}
               onChange={(e) => setFormLocation(e.target.value)}
-              placeholder="e.g. Boris Paichadze Stadium, Tbilisi"
+              placeholder={ka.match.locationPlaceholder}
             />
           </div>
           <div>
             <label className="text-sm font-medium flex items-center gap-1.5 mb-1">
-              <ExternalLink className="h-3.5 w-3.5" />Google Maps URL
+              <ExternalLink className="h-3.5 w-3.5" />{ka.match.googleMapsUrl}
             </label>
             <Input
               value={formLocationUrl}
               onChange={(e) => setFormLocationUrl(e.target.value)}
-              placeholder="https://maps.google.com/..."
+              placeholder={ka.match.googleMapsPlaceholder}
             />
           </div>
           <div className="sm:col-span-2">
             <label className="text-sm font-medium flex items-center gap-1.5 mb-1">
-              <FileText className="h-3.5 w-3.5" />Description
+              <FileText className="h-3.5 w-3.5" />{ka.match.description}
             </label>
             <textarea
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              placeholder="Match notes, special instructions..."
+              placeholder={ka.match.descriptionPlaceholder}
               rows={3}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
             />
           </div>
         </div>
         <Button onClick={handleSave} disabled={saving} className="bg-green-700 hover:bg-green-800">
-          {saving ? "Saving..." : "Save Match Info"}
+          {saving ? ka.common.saving : ka.match.saveMatchInfo}
         </Button>
       </CardContent>
     </Card>

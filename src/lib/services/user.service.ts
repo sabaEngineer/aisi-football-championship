@@ -28,6 +28,7 @@ export const userService = {
 
   async create(data: CreateUserDto) {
     const email = data.email || `staff_${crypto.randomBytes(6).toString("hex")}@staff.local`;
+    const phone = data.phone ?? "";
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new Error("A user with this email already exists");
@@ -39,6 +40,7 @@ export const userService = {
       data: {
         ...data,
         email,
+        phone,
         password: hashedPassword,
       },
     });

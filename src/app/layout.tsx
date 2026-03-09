@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AISI Football Championship",
-  description: "Football championship management — teams, matches, players, and more.",
+  title: "AISI ფეხბურთის ჩემპიონატი",
+  description: "ფეხბურთის ჩემპიონატის მართვა — გუნდები, მატჩები, მოთამაშეები და სხვა.",
 };
 
 export default async function RootLayout({
@@ -22,7 +22,7 @@ export default async function RootLayout({
   const session = await getSession();
 
   return (
-    <html lang="en">
+    <html lang="ka">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Navbar user={session} />
         <main className="mx-auto max-w-7xl px-4 py-8">

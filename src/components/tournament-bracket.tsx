@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Trophy } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface BracketMatch {
   id: number;
@@ -23,10 +24,10 @@ interface Props {
 
 function getRoundLabel(round: number, totalRounds: number): string {
   const fromFinal = totalRounds - round;
-  if (fromFinal === 0) return "Final";
-  if (fromFinal === 1) return "Semi-Finals";
-  if (fromFinal === 2) return "Quarter-Finals";
-  return `Round ${round}`;
+  if (fromFinal === 0) return ka.match.round.final;
+  if (fromFinal === 1) return ka.match.round.semiFinal;
+  if (fromFinal === 2) return ka.match.round.quarterFinal;
+  return ka.match.round.roundN.replace("{n}", String(round));
 }
 
 export function TournamentBracket({ matches, totalRounds }: Props) {
@@ -46,7 +47,7 @@ export function TournamentBracket({ matches, totalRounds }: Props) {
         <div className="flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-yellow-50 border border-yellow-200">
           <Trophy className="h-6 w-6 text-yellow-500" />
           <span className="text-lg font-bold text-yellow-800">{champion.name}</span>
-          <span className="text-sm text-yellow-600">Champion!</span>
+          <span className="text-sm text-yellow-600">{ka.match.champion}</span>
         </div>
       )}
 
@@ -143,7 +144,7 @@ function TeamSlot({
           isBye && "text-muted-foreground/50"
         )}
       >
-        {isBye ? "BYE" : team ? team.name : "TBD"}
+        {isBye ? ka.match.bye : team ? team.name : ka.match.tbd}
       </span>
       {isCompleted && team && !isBye && (
         <span

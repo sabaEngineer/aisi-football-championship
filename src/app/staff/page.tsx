@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -31,15 +32,15 @@ export default async function StaffListPage() {
     <div className="space-y-6">
       <div className="rounded-xl bg-green-700 px-6 py-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Staff Members</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">{ka.staff.title}</h1>
           <p className="text-white/80 mt-1">
-            {staffUsers.length} staff member{staffUsers.length !== 1 ? "s" : ""} registered
+            {ka.staff.membersCount.replace("{n}", String(staffUsers.length))}
           </p>
         </div>
         {isAdmin && (
           <Link href="/staff/new">
             <Button className="bg-white text-green-800 hover:bg-green-50">
-              <Plus className="h-4 w-4 mr-2" />Add Staff
+              <Plus className="h-4 w-4 mr-2" />{ka.staff.addStaff}
             </Button>
           </Link>
         )}
@@ -47,21 +48,21 @@ export default async function StaffListPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Staff</CardTitle>
+          <CardTitle>{ka.staff.allStaff}</CardTitle>
         </CardHeader>
         <CardContent>
           {staffUsers.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No staff members yet.{isAdmin ? " Click \"Add Staff\" to create one." : ""}
+              {ka.staff.noStaff}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Assignments</TableHead>
+                  <TableHead>{ka.staff.name}</TableHead>
+                  <TableHead>{ka.staff.staffRole}</TableHead>
+                  <TableHead>{ka.staff.phoneLabel}</TableHead>
+                  <TableHead>{ka.staff.assignments}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -72,25 +73,25 @@ export default async function StaffListPage() {
                       {staff.position ? (
                         <Badge variant="outline">{staff.position}</Badge>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">&#8212;</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {staff.phone || "—"}
+                      {staff.phone || "\u2014"}
                     </TableCell>
                     <TableCell>
                       {staff.matchStaff.length === 0 ? (
-                        <span className="text-muted-foreground text-sm">No assignments</span>
+                        <span className="text-muted-foreground text-sm">{ka.staff.noAssignments}</span>
                       ) : (
                         <div className="flex flex-wrap gap-1">
                           {staff.matchStaff.slice(0, 3).map((a) => (
                             <Badge key={a.id} variant="secondary" className="text-xs">
-                              {a.match.homeTeam?.name ?? "TBD"} vs {a.match.awayTeam?.name ?? "TBD"}
+                              {a.match.homeTeam?.name ?? ka.match.tbd} {ka.common.vs} {a.match.awayTeam?.name ?? ka.match.tbd}
                             </Badge>
                           ))}
                           {staff.matchStaff.length > 3 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{staff.matchStaff.length - 3} more
+                              {`+${staff.matchStaff.length - 3} \u10E1\u10EE\u10D5\u10D0`}
                             </Badge>
                           )}
                         </div>

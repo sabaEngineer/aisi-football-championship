@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +33,14 @@ export default async function ChampionshipsPage() {
       {/* Green banner at the top */}
       <div className="rounded-xl bg-green-700 px-6 py-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Championships</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">{ka.championship.title}</h1>
           <p className="text-white/80 mt-1">
-            {isAdmin ? "Manage your football championships" : "Browse football championships"}
+            {isAdmin ? ka.championship.manageDesc : ka.championship.browseDesc}
           </p>
         </div>
         {isAdmin && (
           <Link href="/championships/new">
-            <Button className="bg-white text-green-800 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />New Championship</Button>
+            <Button className="bg-white text-green-800 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />{ka.championship.newChampionship}</Button>
           </Link>
         )}
       </div>
@@ -47,7 +48,7 @@ export default async function ChampionshipsPage() {
       {championships.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No championships yet.{isAdmin ? " Create your first one!" : ""}
+            {`${ka.championship.noChampionships}`}
           </CardContent>
         </Card>
       ) : (
@@ -59,7 +60,7 @@ export default async function ChampionshipsPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{c.name}</CardTitle>
                     <Badge className={statusColor[c.status] || ""} variant="secondary">
-                      {c.status}
+                      {ka.championship.status[c.status as keyof typeof ka.championship.status] || c.status}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -67,17 +68,17 @@ export default async function ChampionshipsPage() {
                   <div className="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
                     <div>
                       <span className="font-medium text-foreground">{c._count.teams}</span>
-                      {" / "}{c.maxTeams} teams
+                      {" / "}{c.maxTeams} {ka.championship.teams}
                     </div>
                     <div>
-                      <span className="font-medium text-foreground">{c._count.matches}</span> matches
+                      <span className="font-medium text-foreground">{c._count.matches}</span> {ka.championship.matches}
                     </div>
                     <div>
-                      <span className="font-medium text-foreground">{c._count.sponsors}</span> sponsors
+                      <span className="font-medium text-foreground">{c._count.sponsors}</span> {ka.championship.sponsors}
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Max {c.maxPlayersPerTeam} players per team
+                    {`მაქს. ${c.maxPlayersPerTeam} მოთამაშე გუნდში`}
                   </p>
                 </CardContent>
               </Card>

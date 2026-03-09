@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, X } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface AssignedStaff {
   id: number;
@@ -58,7 +59,7 @@ export function StaffAssignment({ matchId, assignedStaff, availableStaff, isAdmi
         router.refresh();
       }
     } catch {
-      setError("Failed to assign staff");
+      setError(ka.staff.failedAssign);
     }
     setSaving(false);
   }
@@ -76,13 +77,13 @@ export function StaffAssignment({ matchId, assignedStaff, availableStaff, isAdmi
       if (!data.success) setError(data.error);
       else router.refresh();
     } catch {
-      setError("Failed to remove staff");
+      setError(ka.staff.failedRemove);
     }
     setRemoving(null);
   }
 
   if (assignedStaff.length === 0 && !isAdmin) {
-    return <p className="text-muted-foreground text-sm">No staff assigned to this match yet.</p>;
+    return <p className="text-muted-foreground text-sm">{ka.staff.noStaffOnMatch}</p>;
   }
 
   return (
@@ -119,20 +120,20 @@ export function StaffAssignment({ matchId, assignedStaff, availableStaff, isAdmi
       {isAdmin && !adding && unassigned.length > 0 && (
         <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
-          Assign Staff
+          {ka.staff.assignStaff}
         </Button>
       )}
 
       {isAdmin && adding && (
         <div className="flex flex-wrap items-end gap-3 rounded-lg border p-4 bg-muted/30">
           <div>
-            <label className="text-sm font-medium block mb-1">Staff Member</label>
+            <label className="text-sm font-medium block mb-1">{ka.staff.staffMember}</label>
             <select
               value={selectedUserId ?? ""}
               onChange={(e) => setSelectedUserId(Number(e.target.value) || null)}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm h-9 min-w-[180px]"
             >
-              <option value="">Select...</option>
+              <option value="">{ka.staff.selectStaff}</option>
               {unassigned.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.fullName}{s.position ? ` (${s.position})` : ""}
@@ -141,32 +142,32 @@ export function StaffAssignment({ matchId, assignedStaff, availableStaff, isAdmi
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Match Role</label>
+            <label className="text-sm font-medium block mb-1">{ka.staff.matchRole}</label>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm h-9 min-w-[140px]"
             >
-              <option value="Referee">Referee</option>
-              <option value="Assistant Referee">Assistant Referee</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Photographer">Photographer</option>
-              <option value="Fourth Official">Fourth Official</option>
+              <option value="Referee">{ka.staff.roles_list.referee}</option>
+              <option value="Assistant Referee">{ka.staff.roles_list.assistantReferee}</option>
+              <option value="Doctor">{ka.staff.roles_list.doctor}</option>
+              <option value="Photographer">{ka.staff.roles_list.photographer}</option>
+              <option value="Fourth Official">{ka.staff.roles_list.fourthOfficial}</option>
             </select>
           </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAssign} disabled={saving || !selectedUserId}>
-              {saving ? "Assigning..." : "Assign"}
+              {saving ? ka.staff.assigning : ka.staff.assign}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => { setAdding(false); setError(""); }}>
-              Cancel
+              {ka.common.cancel}
             </Button>
           </div>
         </div>
       )}
 
       {isAdmin && unassigned.length === 0 && assignedStaff.length > 0 && (
-        <p className="text-xs text-muted-foreground">All staff members have been assigned.</p>
+        <p className="text-xs text-muted-foreground">{ka.staff.allAssigned}</p>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 export const ka = {
   common: {
-    appName: "AISI ჩემპიონატი",
-    appFullName: "AISI ფეხბურთის ჩემპიონატი",
+    appName: "აისის ჩემპიონატი",
+    appFullName: "აისის ფეხბურთის ჩემპიონატი",
     season: "სეზონი 2026",
     or: "ან",
     vs: "VS",
@@ -29,9 +29,9 @@ export const ka = {
   },
 
   landing: {
-    title: "AISI ფეხბურთის",
+    title: "აისის საფეხბურთო",
     subtitle: "ჩემპიონატი",
-    description: "ქართული ფეხბურთის სახლი. თვალყური ადევნე შენს საყვარელ გუნდებს, ტურნირის ბადეს და გზას გამარჯვებისკენ.",
+    description: "",
     viewChampionships: "ჩემპიონატების ნახვა",
     myDashboard: "ჩემი პანელი",
     joinAsPlayer: "შემოგვიერთდი",

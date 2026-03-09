@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check } from "lucide-react";
+import { ka } from "@/lib/ka";
 
 interface MatchEntry {
   id: number;
@@ -18,10 +19,10 @@ interface MatchEntry {
 
 function getRoundLabel(round: number, totalRounds: number): string {
   const fromFinal = totalRounds - round;
-  if (fromFinal === 0) return "Final";
-  if (fromFinal === 1) return "Semi-Final";
-  if (fromFinal === 2) return "Quarter-Final";
-  return `Round ${round}`;
+  if (fromFinal === 0) return ka.match.round.final;
+  if (fromFinal === 1) return ka.match.round.semiFinal;
+  if (fromFinal === 2) return ka.match.round.quarterFinal;
+  return ka.match.round.roundN.replace("{n}", String(round));
 }
 
 export function MatchScoreEntry({
@@ -37,7 +38,7 @@ export function MatchScoreEntry({
 
   async function handleSave(matchId: number, homeScore: number, awayScore: number) {
     if (homeScore === awayScore) {
-      setError("Knockout matches cannot end in a draw. Scores must differ.");
+      setError(ka.match.noDrawAllowed);
       return;
     }
     setSaving(matchId);
@@ -59,7 +60,7 @@ export function MatchScoreEntry({
         router.refresh();
       }
     } catch {
-      setError("Failed to save result");
+      setError(ka.match.failedToSave);
     }
     setSaving(null);
   }
@@ -100,7 +101,7 @@ function MatchRow({
         {getRoundLabel(match.round, totalRounds)}
       </span>
       <span className="font-medium text-sm truncate flex-1 text-right">
-        {match.homeTeam?.name ?? "TBD"}
+        {match.homeTeam?.name ?? ka.match.tbd}
       </span>
       <Input
         type="number"
@@ -109,7 +110,7 @@ function MatchRow({
         onChange={(e) => setHomeScore(Number(e.target.value))}
         className="w-14 text-center"
       />
-      <span className="text-muted-foreground text-xs">vs</span>
+      <span className="text-muted-foreground text-xs">{ka.common.vs}</span>
       <Input
         type="number"
         min={0}
@@ -118,7 +119,7 @@ function MatchRow({
         className="w-14 text-center"
       />
       <span className="font-medium text-sm truncate flex-1">
-        {match.awayTeam?.name ?? "TBD"}
+        {match.awayTeam?.name ?? ka.match.tbd}
       </span>
       <Button
         size="sm"
@@ -128,7 +129,7 @@ function MatchRow({
         onClick={() => onSave(match.id, homeScore, awayScore)}
       >
         <Check className="h-4 w-4 mr-1" />
-        {saving ? "..." : "Save"}
+        {saving ? "..." : ka.common.save}
       </Button>
     </div>
   );
