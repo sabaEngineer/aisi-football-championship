@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/phone-input";
 import { ka } from "@/lib/ka";
+import { isValidGeorgianPhone } from "@/lib/phone";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -76,9 +78,7 @@ export default function LoginPage() {
               {ka.auth.loginHeroDesc}
             </p>
 
-            <p className="mt-6 text-white/30 text-sm tracking-[0.2em] uppercase font-medium">
-              ფეხბურთის ჩემპიონატი
-            </p>
+          
           </div>
         </div>
 
@@ -105,13 +105,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">{ka.auth.phone}</label>
-                <Input
-                  name="phone"
-                  type="tel"
-                  placeholder="+995 555 123 456"
-                  required
-                  className="h-11"
-                />
+                <PhoneInput name="phone" required />
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">{ka.auth.password}</label>

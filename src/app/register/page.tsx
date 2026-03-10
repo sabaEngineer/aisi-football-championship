@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/phone-input";
 import { ka } from "@/lib/ka";
+import { isValidGeorgianPhone } from "@/lib/phone";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,6 +31,11 @@ export default function RegisterPage() {
     const confirmPassword = form.get("confirmPassword") as string;
     if (body.password !== confirmPassword) {
       setError(ka.auth.passwordsMismatch);
+      setLoading(false);
+      return;
+    }
+    if (!isValidGeorgianPhone(body.phone)) {
+      setError(ka.auth.phoneInvalid);
       setLoading(false);
       return;
     }
@@ -85,9 +92,6 @@ export default function RegisterPage() {
               {ka.auth.registerHeroDesc}
             </p>
 
-            <p className="mt-6 text-white/30 text-sm tracking-[0.2em] uppercase font-medium">
-              ფეხბურთის ჩემპიონატი
-            </p>
           </div>
         </div>
 
@@ -123,13 +127,7 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">{ka.auth.phone}</label>
-                <Input
-                  name="phone"
-                  type="tel"
-                  placeholder="+995 555 123 456"
-                  required
-                  className="h-11"
-                />
+                <PhoneInput name="phone" required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">

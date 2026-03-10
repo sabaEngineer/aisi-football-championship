@@ -12,8 +12,12 @@ export async function POST(request: NextRequest) {
 
     const { fullName, phone, password, socialMediaLink } = parsed.data;
 
-    // Check if phone already exists
-    const existing = await prisma.user.findFirst({ where: { phone } });
+    // Check if phone already exists (try normalized and legacy formats)
+    const { getPhoneLookupVariants } = await import("@/lib/phone");
+    const variants = getPhoneLookupVariants(phone);
+    const existing = await prisma.user.findFirst({
+      where: { phone: { in: variants } },
+    });
     if (existing) return error("A user with this phone number already exists", 409);
 
     const hashedPassword = await bcrypt.hash(password, 10);

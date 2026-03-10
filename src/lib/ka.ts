@@ -7,7 +7,7 @@ export const ka = {
     },
     appName: "აისის ჩემპიონატი",
     appFullName: "აისის ფეხბურთის ჩემპიონატი",
-    season: "სეზონი 2026",
+    season: "სეზონი {year}",
     or: "ან",
     vs: "VS",
     save: "შენახვა",
@@ -31,6 +31,7 @@ export const ka = {
     signIn: "შესვლა",
     signOut: "გასვლა",
     register: "რეგისტრაცია",
+    users: "მომხმარებლები",
   },
 
   landing: {
@@ -48,20 +49,22 @@ export const ka = {
   },
 
   auth: {
-    loginTitle: "კეთილი იყოს შენი დაბრუნება",
+    loginTitle: "შეუერთდი შენს გუნდს",
     loginSubtitle: "შეიყვანე ტელეფონის ნომერი და პაროლი",
-    loginHeroTitle: "AISI ფეხბურთის",
+    loginHeroTitle: "აისის საფეხბურთო",
     loginHeroSubtitle: "ჩემპიონატი",
-    loginHeroDesc: "ქართული ფეხბურთის გული. შემოუერთდი თამაშს, უხელმძღვანელე გუნდს, იბრძოლე გამარჯვებისთვის.",
-    registerTitle: "ანგარიშის შექმნა",
-    registerSubtitle: "დარეგისტრირდი ჩემპიონატში მონაწილეობისთვის",
-    registerHeroTitle: "შემოუერთდი",
-    registerHeroSubtitle: "ჩემპიონატს",
-    registerHeroDesc: "დარეგისტრირდი მოთამაშედ, შეუერთდი გუნდს და იბრძოლე გამარჯვებისთვის ქართულ ფეხბურთის ასპარეზზე.",
+    loginHeroDesc: "",
+    registerTitle: "დარეგისტრირდი მონაწილეობისთვის",
+    registerSubtitle: "შექმენი ან აირჩიე საჩემპიონო გუნდი",
+    registerHeroTitle: "აისის საფეხბურთო",
+    registerHeroSubtitle: "ჩემპიონატი",
+    registerHeroDesc: "",
     fullName: "სრული სახელი",
     fullNamePlaceholder: "მაგ. გიორგი მამარდაშვილი",
     phone: "ტელეფონის ნომერი",
     phonePlaceholder: "+995 555 123 456",
+    phonePlaceholderFlexible: "555 123 456 ან +995 555 123 456",
+    phoneInvalid: "შეიყვანე სწორი ქართული ნომერი (მაგ. +995 555 123 456)",
     password: "პაროლი",
     passwordPlaceholder: "შეიყვანე პაროლი",
     confirmPassword: "დაადასტურე პაროლი",
@@ -346,6 +349,20 @@ export const ka = {
 
   profile: {
     title: "პროფილი",
+  },
+
+  users: {
+    title: "მომხმარებლები",
+    subtitle: "ყველა რეგისტრირებული მომხმარებლის პირადი მონაცემები",
+    allUsers: "ყველა მომხმარებელი",
+    noUsers: "მომხმარებლები ჯერ არ არის.",
+    fullName: "სრული სახელი",
+    email: "ელფოსტა",
+    phone: "ტელეფონი",
+    socialProfile: "სოციალური პროფილი",
+    role: "როლი",
+    position: "პოზიცია",
+    registered: "დარეგისტრირდა",
   },
 } as const;
 

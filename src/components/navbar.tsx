@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Trophy, LogOut, User, LogIn } from "lucide-react";
+import { Trophy, LogOut, User, LogIn, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ka } from "@/lib/ka";
@@ -31,6 +31,14 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
 
         {user ? (
           <div className="flex items-center gap-3">
+            {user.role === "ADMIN" && (
+              <Link href="/users">
+                <Button variant="ghost" size="sm" className="gap-1.5">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">{ka.nav.users}</span>
+                </Button>
+              </Link>
+            )}
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium hidden sm:inline">{user.fullName}</span>

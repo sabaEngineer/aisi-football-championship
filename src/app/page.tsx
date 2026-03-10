@@ -61,7 +61,7 @@ export default async function LandingPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 pt-16 pb-32 sm:pt-20 sm:pb-40 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white/80 backdrop-blur-sm mb-6">
             <Star className="h-3.5 w-3.5 text-yellow-400" />
-            {ka.common.season}
+            {ka.common.season.replace("{year}", String(new Date().getFullYear()))}
           </div>
 
           <h1 className="text-5xl sm:text-7xl font-extrabold text-white tracking-tight leading-none">

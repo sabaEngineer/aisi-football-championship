@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
 import { createToken, COOKIE_NAME } from "@/lib/auth";
 import { parseBody, error } from "@/lib/api-helpers";
+import { getPhoneLookupVariants } from "@/lib/phone";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,8 +12,11 @@ export async function POST(request: NextRequest) {
     if (parsed.error) return parsed.error;
 
     const { phone, password } = parsed.data;
+    const variants = getPhoneLookupVariants(phone);
 
-    const user = await prisma.user.findFirst({ where: { phone } });
+    const user = await prisma.user.findFirst({
+      where: { phone: { in: variants } },
+    });
     if (!user) return error("Invalid phone number or password", 401);
 
     const valid = await bcrypt.compare(password, user.password);
