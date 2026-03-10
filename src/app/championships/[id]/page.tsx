@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Plus } from "lucide-react";
 import { ka } from "@/lib/ka";
+import { AllTeamsFullModal } from "@/components/all-teams-full-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export default async function ChampionshipTeamsTab({
 
   const userCanJoin = isPlayer && session && !currentUserHasTeamInChampionship;
 
-  const champ = championship;
+  const champ = championship!;
   function teamNeedsPlayers(team: { members: { status: string }[] }) {
     const activeCount = team.members.filter((m) => m.status === "ACTIVE").length;
     const reserveCount = team.members.filter((m) => m.status === "RESERVE").length;
@@ -62,7 +63,19 @@ export default async function ChampionshipTeamsTab({
     return canJoinActive || canJoinReserve;
   }
 
+  const allTeamsFullInChampionship =
+    champ.teams.length > 0 && champ.teams.every((t) => !teamNeedsPlayers(t));
+  const noTeamsOrAllFull =
+    champ.teams.length === 0 || allTeamsFullInChampionship;
+  const showAllTeamsFullModal =
+    isPlayer &&
+    !!session &&
+    !currentUserHasTeamInChampionship &&
+    noTeamsOrAllFull;
+
   return (
+    <>
+      {showAllTeamsFullModal && <AllTeamsFullModal open={true} />}
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
@@ -125,5 +138,6 @@ export default async function ChampionshipTeamsTab({
         )}
       </CardContent>
     </Card>
+    </>
   );
 }

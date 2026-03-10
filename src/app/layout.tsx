@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
+import { ChatWidget } from "@/components/chat-widget";
 import { getSession } from "@/lib/auth";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default async function RootLayout({
         <main className="mx-auto max-w-7xl px-4 py-8">
           {children}
         </main>
+        {session && session.role !== "ADMIN" && <ChatWidget />}
       </body>
     </html>
   );

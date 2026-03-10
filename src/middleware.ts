@@ -19,6 +19,7 @@ const ADMIN_ONLY_API: { path: string; methods: string[]; matchSuffix?: string; e
   { path: "/api/matches/", methods: ["PATCH", "DELETE"] },
   { path: "/api/matches/", matchSuffix: "/staff", methods: ["POST"] },
   { path: "/api/users", methods: ["POST"] },
+  { path: "/api/support/", methods: ["PATCH"] },
 ];
 
 function isAdminOnlyApi(pathname: string, method: string): boolean {

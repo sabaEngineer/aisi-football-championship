@@ -19,17 +19,57 @@ export default async function ChampionshipPlayersTab({
   const id = Number(rawId);
   if (isNaN(id)) notFound();
 
-  const members = await prisma.teamMember.findMany({
-    where: { team: { championshipId: id }, status: { not: "LEFT" } },
-    include: {
-      user: true,
-      team: { select: { id: true, name: true } },
-    },
-    orderBy: { user: { fullName: "asc" } },
-  });
+  const [championship, members] = await Promise.all([
+    prisma.championship.findUnique({
+      where: { id },
+      include: {
+        teams: {
+          include: {
+            members: { where: { status: { not: "LEFT" } }, select: { status: true } },
+          },
+        },
+      },
+    }),
+    prisma.teamMember.findMany({
+      where: { team: { championshipId: id }, status: { not: "LEFT" } },
+      include: {
+        user: true,
+        team: { select: { id: true, name: true } },
+      },
+      orderBy: { user: { fullName: "asc" } },
+    }),
+  ]);
+
+  if (!championship) notFound();
 
   const active = members.filter((m) => m.status === "ACTIVE");
   const reserve = members.filter((m) => m.status === "RESERVE");
+
+  const allTeamsAndBenchesFull =
+    championship.teams.length > 0 &&
+    championship.teams.every((t) => {
+      const activeCount = t.members.filter((m) => m.status === "ACTIVE").length;
+      const reserveCount = t.members.filter((m) => m.status === "RESERVE").length;
+      return (
+        activeCount >= championship.maxPlayersPerTeam &&
+        reserveCount >= championship.maxReservesPerTeam
+      );
+    });
+
+  const assignedUserIds = [...new Set(members.map((m) => m.userId))];
+  const unassigned =
+    allTeamsAndBenchesFull && championship.teams.length > 0
+      ? await prisma.user.findMany({
+          where: {
+            role: "PLAYER",
+            id: {
+              notIn: assignedUserIds.length > 0 ? assignedUserIds : [-1],
+            },
+          },
+          select: { id: true, fullName: true, position: true },
+          orderBy: { fullName: "asc" },
+        })
+      : [];
 
   return (
     <div className="space-y-6">
@@ -111,6 +151,45 @@ export default async function ChampionshipPlayersTab({
                 ))}
               </TableBody>
             </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {allTeamsAndBenchesFull && (
+        <Card className="border-amber-200 bg-amber-50/50">
+          <CardHeader>
+            <CardTitle>
+              {ka.player.playersWithoutTeam.replace("{n}", String(unassigned.length))}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {ka.player.playersWithoutTeamDesc}
+            </p>
+          </CardHeader>
+          <CardContent>
+            {unassigned.length === 0 ? (
+              <p className="text-muted-foreground text-sm">{ka.player.noPlayersWithoutTeam}</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{ka.team.player}</TableHead>
+                    <TableHead>{ka.player.position}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {unassigned.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">
+                        <Link href={`/players/${u.id}`} className="hover:underline">
+                          {u.fullName}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{getPositionLabel(u.position)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       )}

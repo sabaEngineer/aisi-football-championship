@@ -8,6 +8,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Plus } from "lucide-react";
+import { AllTeamsFullModal } from "@/components/all-teams-full-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -49,8 +50,18 @@ export default async function TeamsPage() {
     return teamNeedsPlayers(t);
   }
 
+  const allTeamsFull =
+    teams.length > 0 && teams.every((t) => !teamNeedsPlayers(t));
+  const noTeamsOrAllFull = teams.length === 0 || allTeamsFull;
+  const showAllTeamsFullModal =
+    isPlayer &&
+    !!session &&
+    userChampionshipIds.size === 0 &&
+    noTeamsOrAllFull;
+
   return (
     <div className="space-y-6">
+      {showAllTeamsFullModal && <AllTeamsFullModal open={true} />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{ka.team.title}</h1>

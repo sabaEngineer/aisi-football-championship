@@ -61,6 +61,26 @@ model User {
   teamMemberships TeamMember[]
   matchStaff      MatchStaff[]
   matchStats      MatchPlayerStat[]
+  supportMessages SupportMessage[]
+  supportReplies  SupportMessage[] @relation("AdminReplies")
+}
+
+// ─── SupportMessage (user to admin chat) ──────────────────────────────────────
+
+model SupportMessage {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  message    String
+  adminReply String?
+  repliedAt  DateTime?
+  repliedBy  Int?
+
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admin  User? @relation("AdminReplies", fields: [repliedBy], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 // ─── Championship ────────────────────────────────────────────────────────────
