@@ -33,7 +33,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
             height={40}
             className="object-contain"
           />
-          {/* <span>აისური ფეხბურთი</span> */}
+          <span>ჩემპიონატი</span>
         </Link>
 
         {user ? (

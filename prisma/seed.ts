@@ -18,23 +18,25 @@ async function main() {
   const adminPassword = await bcrypt.hash("sbsmaster", 10);
 
   // ── Admin ────────────────────────────────────────────────────────
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: {
-      fullName: "Admin",
-      email: "admin@championship.com",
+      fullName: "ადმინისტრატორი",
+      email: "admin@aisi.ge",
       phone: "591195233",
       password: adminPassword,
       role: "ADMIN",
     },
   });
 
-  // ── Staff members ───────────────────────────────────────────────
+  // ── Staff members (ქართული) ─────────────────────────────────────
   const staffPassword = await bcrypt.hash("staff123", 10);
   const staffData = [
-    { fullName: "Referee One", email: "ref1@championship.com", phone: "+995555000001", position: "Referee" },
-    { fullName: "Referee Two", email: "ref2@championship.com", phone: "+995555000002", position: "Referee" },
-    { fullName: "Dr. Nino", email: "doctor@championship.com", phone: "+995555000003", position: "Doctor" },
-    { fullName: "Photographer Gio", email: "photo@championship.com", phone: "+995555000004", position: "Photographer" },
+    { fullName: "გიორგი ბერიშვილი", email: "msaj1@aisi.ge", phone: "+995555000001", position: "Referee" },
+    { fullName: "ლევან კობახიძე", email: "msaj2@aisi.ge", phone: "+995555000002", position: "Referee" },
+    { fullName: "ნინო ლომიძე", email: "msaj3@aisi.ge", phone: "+995555000003", position: "Assistant Referee" },
+    { fullName: "დავით გელაშვილი", email: "msaj4@aisi.ge", phone: "+995555000004", position: "Assistant Referee" },
+    { fullName: "დოქტორი მარიამ ნადირაძე", email: "doctor@aisi.ge", phone: "+995555000005", position: "Doctor" },
+    { fullName: "ფოტოგრაფი სანდრო მელაძე", email: "photo@aisi.ge", phone: "+995555000006", position: "Photographer" },
   ];
 
   const staffUsers = await Promise.all(
@@ -45,113 +47,180 @@ async function main() {
     )
   );
 
-  // ── Championship: 6 teams, 5 players per team, 2 reserves ─────────
-  const championship = await prisma.championship.create({
+  // ── Sponsors (ქართული) ──────────────────────────────────────────
+  const sponsorData = [
+    { name: "თიბისი ბანკი", website: "https://tbcbank.ge" },
+    { name: "ბორჯომი", website: "https://borjomi.com" },
+    { name: "ვისოლი", website: "https://wissol.ge" },
+    { name: "სილქ რუდი", website: "https://silkrudi.ge" },
+    { name: "მაგთი კომუნიკეიშენს", website: "https://magticom.ge" },
+  ];
+
+  const sponsors = await Promise.all(
+    sponsorData.map((s) => prisma.sponsor.create({ data: s }))
+  );
+
+  // ── Championships ────────────────────────────────────────────────
+  const champMen = await prisma.championship.create({
     data: {
-      name: "AISI Football League 2026",
-      maxTeams: 6,
-      maxPlayersPerTeam: 5,
-      maxReservesPerTeam: 2,
+      name: "კაცთა ლიგა 2026",
+      maxTeams: 10,
+      maxPlayersPerTeam: 6,
+      maxReservesPerTeam: 4,
       status: "REGISTRATION",
     },
   });
 
-  // ── 6 Teams ───────────────────────────────────────────────────────
-  const teamNames = [
-    "Tbilisi FC",
-    "Batumi United",
-    "Kutaisi Dynamo",
-    "Rustavi Stars",
-    "Telavi Rangers",
-    "Zugdidi City",
-  ];
+  const champWomen = await prisma.championship.create({
+    data: {
+      name: "ქალთა ლიგა 2026",
+      maxTeams: 10,
+      maxPlayersPerTeam: 6,
+      maxReservesPerTeam: 4,
+      status: "REGISTRATION",
+    },
+  });
 
-  const teams = await Promise.all(
-    teamNames.map((name) =>
-      prisma.team.create({ data: { name, championshipId: championship.id } })
-    )
-  );
-
-  // ── Player names pool ─────────────────────────────────────────────
-  const firstNames = [
-    "Giorgi", "Luka", "Nika", "Saba", "Dato", "Irakli", "Beka", "Tornike",
-    "Levan", "Guram", "Zurab", "Mikheil", "Davit", "Archil", "Otar",
-  ];
-  const lastNames = [
-    "Mamardashvili", "Kvaratskhelia", "Davitashvili", "Chakvetadze", "Kakabadze",
-    "Dvali", "Kochorashvili", "Lobzhanidze", "Kvekveskiri", "Mikautadze",
-    "Zivzivadze", "Mekvabishvili", "Kashia", "Kvirkvelia", "Tabidze",
-  ];
-  const positions = ["GK", "CB", "LB", "RB", "CDM", "CM", "LW", "RW", "ST"];
-
-  const playerPassword = await bcrypt.hash("player123", 10);
-  let playerIndex = 0;
-
-  function nextPlayerName() {
-    const fn = firstNames[playerIndex % firstNames.length];
-    const ln = lastNames[playerIndex % lastNames.length];
-    playerIndex++;
-    return `${fn} ${ln}`;
-  }
-
-  // ── Create players: 5 active + 2 reserves per team ─────────────────
-  const activePerTeam = 5;
-  const reservesPerTeam = 2;
-
-  for (let t = 0; t < teams.length; t++) {
-    for (let p = 0; p < activePerTeam + reservesPerTeam; p++) {
-      const name = nextPlayerName();
-      const pos = positions[p % positions.length];
-      const isActive = p < activePerTeam;
-
-      const player = await prisma.user.create({
-        data: {
-          fullName: name,
-          email: `player${playerIndex}@championship.com`,
-          phone: `+9955551${String(playerIndex).padStart(4, "0")}`,
-          password: playerPassword,
-          role: "PLAYER",
-          position: pos,
-        },
-      });
-
-      await prisma.teamMember.create({
-        data: {
-          userId: player.id,
-          teamId: teams[t].id,
-          status: isActive ? "ACTIVE" : "RESERVE",
-          role: p === 0 ? "CAPTAIN" : "PLAYER",
-          position: pos,
-        },
+  // Assign sponsors to both championships
+  for (const champ of [champMen, champWomen]) {
+    for (const sponsor of sponsors) {
+      await prisma.championshipSponsor.create({
+        data: { championshipId: champ.id, sponsorId: sponsor.id },
       });
     }
   }
 
-  // ── Sponsors ───────────────────────────────────────────────────────
-  const sponsors = await Promise.all(
-    [
-      { name: "TBC Bank", website: "https://tbcbank.ge" },
-      { name: "Borjomi", website: "https://borjomi.com" },
-      { name: "Wissol", website: "https://wissol.ge" },
-    ].map((s) => prisma.sponsor.create({ data: s }))
-  );
+  // ── Team names (ქართული) ─────────────────────────────────────────
+  const menTeamNames = [
+    "დინამო თბილისი",
+    "ტორპედო ქუთაისი",
+    "სამცხე ბორჯომი",
+    "გურია ლანჩხუთი",
+    "ვიტ ჯორჯია",
+    "სიონი ბოლნისი",
+    "კოლხეთი ფოთი",
+    "ლოკომოტივი თბილისი",
+    "სპარტაკი ცხინვალი",
+    "სამტრედია",
+  ];
 
-  await Promise.all(
-    sponsors.map((s) =>
-      prisma.championshipSponsor.create({
-        data: { championshipId: championship.id, sponsorId: s.id },
-      })
-    )
-  );
+  const womenTeamNames = [
+    "ნორჩი ვეფხვები",
+    "ქალთა დინამო",
+    "ლაზიკა ბათუმი",
+    "სამგრე თბილისი",
+    "ფოთის ქალები",
+    "ქუთაისის ტიტანები",
+    "ბოლნისის სასტრი",
+    "რუსთავის გიგანტები",
+    "თელავის არწივები",
+    "ზუგდიდის კოლხები",
+  ];
+
+  // ── Player name pools ─────────────────────────────────────────────
+  const maleFirstNames = [
+    "გიორგი", "ლუკა", "ნიკა", "საბა", "დავით", "ირაკლი", "ბექა", "ტორნიკე",
+    "ლევან", "გურამ", "ზურაბ", "მიხეილ", "არჩილ", "ოთარ", "სანდრო", "შოთა",
+  ];
+  const maleLastNames = [
+    "მამარდაშვილი", "კვარაცხელია", "დავითაშვილი", "ჩაკვეტაძე", "კაკაბაძე",
+    "დვალი", "ყოჩორაშვილი", "ლობჟანაძე", "ქვექვესკირი", "მიქაუტაძე",
+    "ზივზივაძე", "მეყვაბიშვილი", "ქაშია", "ყვირყველია", "ტაბიძე", "გელაშვილი",
+  ];
+
+  const femaleFirstNames = [
+    "ნინო", "მარიამ", "სალომე", "ნანა", "ანა", "თამარ", "ნინა", "მანანა",
+    "კეტო", "თეონა", "სოფიო", "ბარბარე", "სანდრა", "ელენე", "ხატია", "მარია",
+  ];
+  const femaleLastNames = [
+    "ბერიშვილი", "გოგოლაძე", "ჩარკვიანი", "კვირიკაშვილი", "ჯავახიშვილი",
+    "ხვიჩია", "ცხადაძე", "კობახიძე", "ლომიძე", "ნადირაძე", "მელაძე",
+    "ქართველიშვილი", "სურმანიძე", "ყიფიანი", "ბურჭულაძე", "გიგაური",
+  ];
+
+  const positions = ["GK", "DEF", "MID", "ATT"];
+
+  const playerPassword = await bcrypt.hash("player123", 10);
+  let globalPlayerId = 0;
+
+  function nextMalePlayer() {
+    const idx = globalPlayerId;
+    const fn = maleFirstNames[idx % maleFirstNames.length];
+    const ln = maleLastNames[Math.floor(idx / maleFirstNames.length) % maleLastNames.length];
+    globalPlayerId++;
+    return `${fn} ${ln}`;
+  }
+
+  function nextFemalePlayer() {
+    const idx = globalPlayerId;
+    const fn = femaleFirstNames[idx % femaleFirstNames.length];
+    const ln = femaleLastNames[Math.floor(idx / femaleFirstNames.length) % femaleLastNames.length];
+    globalPlayerId++;
+    return `${fn} ${ln}`;
+  }
+
+  async function createTeamsForChampionship(
+    championship: { id: number },
+    teamNames: string[],
+    nextPlayer: () => string
+  ) {
+    const teams = await Promise.all(
+      teamNames.map((name) =>
+        prisma.team.create({ data: { name, championshipId: championship.id } })
+      )
+    );
+
+    const activePerTeam = 6;
+    const reservesPerTeam = 4;
+
+    for (let t = 0; t < teams.length; t++) {
+      for (let p = 0; p < activePerTeam + reservesPerTeam; p++) {
+        const name = nextPlayer();
+        const pos = positions[p % positions.length];
+        const isActive = p < activePerTeam;
+        const id = globalPlayerId;
+        const email = `player${id}@aisi.ge`;
+        const phone = `+995555${String(10000 + id).slice(-4)}`;
+
+        const player = await prisma.user.create({
+          data: {
+            fullName: name,
+            email,
+            phone,
+            password: playerPassword,
+            role: "PLAYER",
+            position: pos,
+          },
+        });
+
+        await prisma.teamMember.create({
+          data: {
+            userId: player.id,
+            teamId: teams[t].id,
+            status: isActive ? "ACTIVE" : "RESERVE",
+            role: p === 0 ? "CAPTAIN" : "PLAYER",
+            position: pos,
+          },
+        });
+      }
+    }
+
+    return teams;
+  }
+
+  // ── Create teams for Men's League ─────────────────────────────────
+  const menTeams = await createTeamsForChampionship(champMen, menTeamNames, nextMalePlayer);
+
+  // ── Create teams for Women's League ──────────────────────────────
+  const womenTeams = await createTeamsForChampionship(champWomen, womenTeamNames, nextFemalePlayer);
 
   console.log("\nSeed complete!");
   console.log(`  Admin: phone 591195233, password sbsmaster`);
-  console.log(`  Staff: ${staffUsers.length} members`);
-  console.log(`  Championship: ${championship.name}`);
-  console.log(`  Teams: ${teams.length} (${teamNames.join(", ")})`);
-  console.log(`  Each team: ${activePerTeam} active + ${reservesPerTeam} reserves`);
-  console.log(`  Total players: ${playerIndex}`);
-  console.log(`  Sponsors: ${sponsors.map((s) => s.name).join(", ")}`);
+  console.log(`  Staff: ${staffUsers.length} წევრი (ქართული სახელები)`);
+  console.log(`  ჩემპიონატი 1: ${champMen.name} — ${menTeamNames.length} გუნდი`);
+  console.log(`  ჩემპიონატი 2: ${champWomen.name} — ${womenTeamNames.length} გუნდი`);
+  console.log(`  თითო გუნდში: 6 მოთამაშე + 4 სათადარიგო`);
+  console.log(`  სპონსორები: ${sponsors.map((s) => s.name).join(", ")}`);
 }
 
 main()

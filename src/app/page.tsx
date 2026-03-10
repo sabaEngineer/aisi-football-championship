@@ -12,16 +12,12 @@ export default async function HomePage() {
   const session = await getSession();
   if (session) redirect("/championships");
 
-  const stats = await Promise.all([
-    Promise.all([
-      prisma.championship.count(),
-      prisma.team.count(),
-      prisma.user.count({ where: { role: "PLAYER" } }),
-      prisma.match.count(),
-    ]),
+  const [champCount, teamCount, playerCount, matchCount] = await Promise.all([
+    prisma.championship.count(),
+    prisma.team.count(),
+    prisma.user.count({ where: { role: "PLAYER" } }),
+    prisma.match.count(),
   ]);
-
-  const [champCount, teamCount, playerCount, matchCount] = stats;
 
   const latestChampionships = await prisma.championship.findMany({
     take: 3,
