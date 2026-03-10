@@ -61,6 +61,7 @@ export const ka = {
     players: "მოთამაშეები",
     matches: "მატჩები",
     upcomingMatches: "მომავალი მატჩები",
+    sponsors: "სპონსორები",
   },
 
   auth: {
@@ -424,6 +425,8 @@ export const ka = {
 
   dashboard: {
     title: "პანელი",
+    sponsors: "სპონსორები",
+    ourSponsors: "ჩვენი სპონსორები",
   },
 
   profile: {

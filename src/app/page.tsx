@@ -115,6 +115,31 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Sponsors — below statistics */}
+      <section className="mx-auto max-w-7xl px-4 mt-8">
+        <h2 className="text-xl font-bold tracking-tight mb-4 text-center">{ka.landing.sponsors}</h2>
+        <div className="flex flex-wrap items-center justify-center gap-10 px-6 rounded-2xl border bg-card shadow-sm">
+          <a
+            href="https://www.facebook.com/share/1HoK1cMFes/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px] hover:bg-muted/60 transition-colors"
+          >
+            <img src="/sponsors/my-fitness.jpeg" alt="My Fitness" className="h-28 w-40 object-contain" />
+            <span className="text-sm font-medium text-muted-foreground">My Fitness</span>
+          </a>
+          <a
+            href="https://www.facebook.com/share/17M5qHHUL5/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px] hover:bg-muted/60 transition-colors"
+          >
+            <img src="/sponsors/walhala.jpeg" alt="Valhalla Warrior's Heaven" className="h-28 w-40 object-contain" />
+            <span className="text-sm font-medium text-muted-foreground">Valhalla Warrior's Heaven</span>
+          </a>
+        </div>
+      </section>
+
       {/* Championships */}
       {latestChampionships.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 mt-16">

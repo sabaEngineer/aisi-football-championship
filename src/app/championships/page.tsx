@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, Trophy, Users, Shield, CalendarDays } from "lucide-react";
 import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +17,13 @@ const statusColor: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-700",
 };
 
+const DASHBOARD_SPONSORS: { name: string; logo: string; website?: string }[] = [
+  { name: "My Fitness", logo: "/sponsors/my-fitness.jpeg", website: "https://www.facebook.com/share/1HoK1cMFes/?mibextid=wwXIfr" },
+  { name: "Valhalla Warrior's Heaven", logo: "/sponsors/walhala.jpeg", website: "https://www.facebook.com/share/17M5qHHUL5/?mibextid=wwXIfr" },
+];
+
 export default async function ChampionshipsPage() {
-  const [championships, session] = await Promise.all([
+  const [championships, session, stats] = await Promise.all([
     prisma.championship.findMany({
       select: {
         id: true,
@@ -32,7 +37,14 @@ export default async function ChampionshipsPage() {
       orderBy: { createdAt: "desc" },
     }),
     getSession(),
+    Promise.all([
+      prisma.championship.count(),
+      prisma.team.count(),
+      prisma.user.count({ where: { role: "PLAYER" } }),
+      prisma.match.count(),
+    ]),
   ]);
+  const [champCount, teamCount, playerCount, matchCount] = stats;
 
   const isAdmin = session?.role === "ADMIN";
 
@@ -48,7 +60,7 @@ export default async function ChampionshipsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Green banner at the top */}
+      {/* Green banner */}
       <div className="rounded-xl bg-green-700 px-6 py-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">{ka.championship.title}</h1>
@@ -62,6 +74,57 @@ export default async function ChampionshipsPage() {
           </Link>
         )}
       </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: ka.landing.championships, value: champCount, icon: Trophy, color: "text-yellow-500" },
+          { label: ka.landing.teams, value: teamCount, icon: Shield, color: "text-blue-500" },
+          { label: ka.landing.players, value: playerCount, icon: Users, color: "text-green-600" },
+          { label: ka.landing.matches, value: matchCount, icon: CalendarDays, color: "text-red-500" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-xl border bg-card p-5 text-center shadow-sm">
+            <stat.icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
+            <p className="text-3xl font-bold tabular-nums">{stat.value}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Sponsors — below statistics */}
+      <section>
+        <h2 className="text-xl font-bold tracking-tight mb-4">{ka.dashboard.ourSponsors}</h2>
+        <div className="flex flex-wrap items-center justify-center gap-10 py-8 px-6 rounded-2xl border bg-card shadow-sm">
+          {DASHBOARD_SPONSORS.map((s) => {
+            const content = (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.logo}
+                  alt={s.name}
+                  className="h-28 w-40 object-contain"
+                />
+                <span className="text-sm font-medium text-muted-foreground text-center">{s.name}</span>
+              </>
+            );
+            return s.website ? (
+              <a
+                key={s.name}
+                href={s.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px] hover:bg-muted/60 transition-colors"
+              >
+                {content}
+              </a>
+            ) : (
+              <div key={s.name} className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px]">
+                {content}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {championships.length === 0 ? (
         <Card>
