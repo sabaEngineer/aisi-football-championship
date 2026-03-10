@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/phone-input";
 import { ka } from "@/lib/ka";
-import { isValidGeorgianPhone } from "@/lib/phone";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,11 +31,6 @@ export default function RegisterPage() {
     const confirmPassword = form.get("confirmPassword") as string;
     if (body.password !== confirmPassword) {
       setError(ka.auth.passwordsMismatch);
-      setLoading(false);
-      return;
-    }
-    if (!isValidGeorgianPhone(body.phone)) {
-      setError(ka.auth.phoneInvalid);
       setLoading(false);
       return;
     }

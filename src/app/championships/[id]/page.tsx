@@ -39,6 +39,9 @@ export default async function ChampionshipTeamsTab({
 
   if (!championship) notFound();
 
+  // Sort teams by member count (more full first)
+  const teams = [...championship.teams].sort((a, b) => b.members.length - a.members.length);
+
   const isAdmin = session?.role === "ADMIN";
   const isPlayer = session?.role === "PLAYER";
 
@@ -64,9 +67,9 @@ export default async function ChampionshipTeamsTab({
   }
 
   const allTeamsFullInChampionship =
-    champ.teams.length > 0 && champ.teams.every((t) => !teamNeedsPlayers(t));
+    teams.length > 0 && teams.every((t) => !teamNeedsPlayers(t));
   const noTeamsOrAllFull =
-    champ.teams.length === 0 || allTeamsFullInChampionship;
+    teams.length === 0 || allTeamsFullInChampionship;
   const showAllTeamsFullModal =
     isPlayer &&
     !!session &&
@@ -79,9 +82,9 @@ export default async function ChampionshipTeamsTab({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
-          {`${ka.tabs.teams} (${championship.teams.length} / ${championship.maxTeams})`}
+          {`${ka.tabs.teams} (${teams.length} / ${championship.maxTeams})`}
         </CardTitle>
-        {isAdmin && championship.teams.length < championship.maxTeams && (
+        {isAdmin && teams.length < championship.maxTeams && (
           <Link href={`/teams/new?championshipId=${championship.id}`}>
             <Button variant="outline" size="sm">
               <Plus className="h-4 w-4 mr-2" />{ka.team.addTeam}
@@ -90,7 +93,7 @@ export default async function ChampionshipTeamsTab({
         )}
       </CardHeader>
       <CardContent>
-        {championship.teams.length === 0 ? (
+        {teams.length === 0 ? (
           <p className="text-muted-foreground text-sm">{ka.team.noTeams}</p>
         ) : (
           <Table>
@@ -104,7 +107,7 @@ export default async function ChampionshipTeamsTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {championship.teams.map((team) => {
+              {teams.map((team) => {
                 const captain = team.members.find((m) => m.role === "CAPTAIN" && m.status === "ACTIVE");
                 const activeCount = team.members.filter((m) => m.status === "ACTIVE").length;
                 const reserveCount = team.members.filter((m) => m.status === "RESERVE").length;

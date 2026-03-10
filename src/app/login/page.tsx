@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/phone-input";
 import { ka } from "@/lib/ka";
-import { isValidGeorgianPhone } from "@/lib/phone";
 
 export default function LoginPage() {
   const router = useRouter();

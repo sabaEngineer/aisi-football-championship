@@ -31,6 +31,8 @@ const PLAYER_PASSWORD = "player123";
 async function main() {
   console.log("Cleaning database...");
 
+  await prisma.nominationWinner.deleteMany();
+  await prisma.nomination.deleteMany();
   await prisma.matchPlayerStat.deleteMany();
   await prisma.matchStaff.deleteMany();
   await prisma.match.deleteMany();
@@ -39,6 +41,7 @@ async function main() {
   await prisma.team.deleteMany();
   await prisma.championship.deleteMany();
   await prisma.sponsor.deleteMany();
+  await prisma.supportMessage.deleteMany();
   await prisma.user.deleteMany();
 
   const adminPassword = await bcrypt.hash("sbsmaster", 10);

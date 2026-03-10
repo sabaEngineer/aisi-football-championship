@@ -41,17 +41,21 @@ export function normalizeGeorgianPhone(phone: string): string {
   return phone.trim();
 }
 
-/** Variants for DB lookup (handles legacy formats like "591195233" or "+995555000001") */
+/** Variants for DB lookup (handles different formats for flexible matching) */
 export function getPhoneLookupVariants(phone: string): string[] {
-  const normalized = normalizeGeorgianPhone(phone);
-  const digits = digitsOnly(phone);
-  const variants = new Set<string>([normalized]);
-  if (digits.length === 12 && digits.startsWith("995")) {
-    variants.add(digits.slice(3)); // 9-digit local
-  }
-  if (digits.length === 9) {
+  const trimmed = phone.trim();
+  const digits = digitsOnly(trimmed);
+  const variants = new Set<string>([trimmed]);
+  if (digits.length > 0) {
     variants.add(digits);
-    variants.add(`+995${digits}`);
+    const normalized = normalizeGeorgianPhone(trimmed);
+    if (normalized !== trimmed) variants.add(normalized);
+    if (digits.length === 12 && digits.startsWith("995")) {
+      variants.add(digits.slice(3)); // 9-digit local
+    }
+    if (digits.length === 9) {
+      variants.add(`+995${digits}`);
+    }
   }
   return Array.from(variants);
 }
