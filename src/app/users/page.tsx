@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -12,16 +11,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Users, ExternalLink, Search } from "lucide-react";
 import { ka, getPositionLabel } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string }>;
+}) {
   const session = await getSession();
   if (session?.role !== "ADMIN") notFound();
 
+  const { search } = await searchParams;
+  const searchTerm = (search ?? "").trim();
+
   const users = await prisma.user.findMany({
+    where: searchTerm
+      ? {
+          OR: [
+            { fullName: { contains: searchTerm, mode: "insensitive" } },
+            { phone: { contains: searchTerm } },
+          ],
+        }
+      : undefined,
     select: {
       id: true,
       fullName: true,
@@ -51,7 +67,21 @@ export default async function UsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{ka.users.allUsers}</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle>{ka.users.allUsers}</CardTitle>
+            <form method="GET" action="/users" className="flex gap-2">
+              <Input
+                name="search"
+                type="search"
+                placeholder={ka.users.searchPlaceholder}
+                defaultValue={searchTerm}
+                className="min-w-[200px] sm:min-w-[280px]"
+              />
+              <Button type="submit" variant="secondary" size="icon">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
