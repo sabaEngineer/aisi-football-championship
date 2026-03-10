@@ -17,11 +17,6 @@ const statusColor: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-700",
 };
 
-const DASHBOARD_SPONSORS: { name: string; logo: string; website?: string }[] = [
-  { name: "My Fitness", logo: "/sponsors/my-fitness.jpeg", website: "https://www.facebook.com/share/1HoK1cMFes/?mibextid=wwXIfr" },
-  { name: "Valhalla Warrior's Heaven", logo: "/sponsors/walhala.jpeg", website: "https://www.facebook.com/share/17M5qHHUL5/?mibextid=wwXIfr" },
-];
-
 export default async function ChampionshipsPage() {
   const [championships, session, stats] = await Promise.all([
     prisma.championship.findMany({
@@ -90,41 +85,6 @@ export default async function ChampionshipsPage() {
           </div>
         ))}
       </div>
-
-      {/* Sponsors — below statistics */}
-      <section>
-        <h2 className="text-xl font-bold tracking-tight mb-4">{ka.dashboard.ourSponsors}</h2>
-        <div className="flex flex-wrap items-center justify-center gap-10 py-8 px-6 rounded-2xl border bg-card shadow-sm">
-          {DASHBOARD_SPONSORS.map((s) => {
-            const content = (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={s.logo}
-                  alt={s.name}
-                  className="h-28 w-40 object-contain"
-                />
-                <span className="text-sm font-medium text-muted-foreground text-center">{s.name}</span>
-              </>
-            );
-            return s.website ? (
-              <a
-                key={s.name}
-                href={s.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px] hover:bg-muted/60 transition-colors"
-              >
-                {content}
-              </a>
-            ) : (
-              <div key={s.name} className="flex flex-col items-center gap-3 p-6 rounded-xl bg-muted/40 min-w-[180px]">
-                {content}
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       {championships.length === 0 ? (
         <Card>
