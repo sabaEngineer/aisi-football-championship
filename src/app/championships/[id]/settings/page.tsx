@@ -31,6 +31,8 @@ export default async function ChampionshipSettingsTab({
     <div className="space-y-6">
       <ChampionshipSettings
         championshipId={championship.id}
+        championshipName={championship.name}
+        championshipDescription={championship.description}
         currentMaxTeams={championship.maxTeams}
         currentMaxPlayersPerTeam={championship.maxPlayersPerTeam}
         currentMaxReservesPerTeam={championship.maxReservesPerTeam}

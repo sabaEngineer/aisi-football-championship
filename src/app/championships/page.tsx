@@ -20,7 +20,15 @@ const statusColor: Record<string, string> = {
 export default async function ChampionshipsPage() {
   const [championships, session] = await Promise.all([
     prisma.championship.findMany({
-      include: { _count: { select: { teams: true, matches: true, sponsors: true } } },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        maxTeams: true,
+        maxPlayersPerTeam: true,
+        _count: { select: { teams: true, matches: true, sponsors: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
     getSession(),
@@ -90,6 +98,9 @@ export default async function ChampionshipsPage() {
                   <p className="text-xs text-muted-foreground mt-3">
                     {`მაქს. ${c.maxPlayersPerTeam} მოთამაშე გუნდში`}
                   </p>
+                  {c.description && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
+                  )}
                   {session && registeredChampionshipIds.has(c.id) && (
                     <p className="text-xs mt-2 font-semibold text-green-600">
                       {ka.championship.yourChampionship}

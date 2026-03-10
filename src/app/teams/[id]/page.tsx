@@ -78,8 +78,13 @@ export default async function TeamDetailPage({
       status: m.status as "ACTIVE" | "RESERVE",
     }));
 
+  const teamNeedsPlayers = active.length < team.championship.maxPlayersPerTeam ||
+    (active.length >= team.championship.maxPlayersPerTeam && reserve.length < team.championship.maxReservesPerTeam);
+  const showJoinHint = session?.role === "PLAYER" && !currentUserHasTeam && teamNeedsPlayers;
+
   return (
     <div className="space-y-8">
+      
       <div className="flex items-center justify-between">
         <div>
           <Link
@@ -100,8 +105,36 @@ export default async function TeamDetailPage({
         </div>
       </div>
 
-      {/* Football Pitch View */}
-      <FootballPitch
+      {showJoinHint && (
+        <div className="text-sm text-foreground">
+          {ka.team.joinHint}
+        </div>
+      )}
+
+      {/* Reserve Bench + Football Pitch — bench above stadium */}
+      <div className="w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-xl">
+        {reserve.length > 0 && (
+          <div className="bg-slate-800/95 border-b border-slate-600/50 px-4 py-3 flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider shrink-0">
+              {ka.team.reserveBench.replace("{n}", String(reserve.length)).replace("{max}", String(team.championship.maxReservesPerTeam))}
+            </span>
+            <div className="flex-1 flex items-center gap-2 flex-wrap">
+              {reserve.map((m) => (
+                <Link
+                  key={m.id}
+                  href={`/players/${m.userId}`}
+                  className="flex items-center gap-1.5 rounded-full bg-slate-700/80 hover:bg-slate-600 px-2.5 py-1 text-sm text-white transition-colors"
+                >
+                  <span className="w-6 h-6 rounded-full bg-slate-500 flex items-center justify-center text-[10px] font-bold shrink-0">
+                    {m.user.fullName.charAt(0)}
+                  </span>
+                  <span className="font-medium">{m.user.fullName}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+        <FootballPitch
         teamId={team.id}
         teamName={team.name}
         championshipId={team.championshipId}
@@ -112,7 +145,9 @@ export default async function TeamDetailPage({
         currentUserId={session?.userId ?? null}
         currentUserRole={session?.role ?? null}
         currentUserHasTeam={currentUserHasTeam}
+        hasBenchAbove={reserve.length > 0}
       />
+      </div>
 
       {/* Add Reserve button — when team active is full and reserves have room (so new joiners go to reserve) */}
       {(isAdmin || (session?.role === "PLAYER" && !currentUserHasTeam)) &&
@@ -188,6 +223,11 @@ export default async function TeamDetailPage({
                           currentStatus="ACTIVE"
                           canMoveToReserve={m.role !== "CAPTAIN" && reserve.length < team.championship.maxReservesPerTeam}
                           canMoveToActive={false}
+                          swapPartnersForReserve={
+                            m.role !== "CAPTAIN" && reserve.length >= team.championship.maxReservesPerTeam
+                              ? reserve.map((r) => ({ id: r.id, fullName: r.user.fullName }))
+                              : []
+                          }
                         />
                       </TableCell>
                     )}
@@ -248,6 +288,11 @@ export default async function TeamDetailPage({
                           currentStatus="RESERVE"
                           canMoveToReserve={false}
                           canMoveToActive={active.length < team.championship.maxPlayersPerTeam}
+                          swapPartnersForActive={
+                            active.length >= team.championship.maxPlayersPerTeam
+                              ? active.filter((a) => a.role !== "CAPTAIN").map((a) => ({ id: a.id, fullName: a.user.fullName }))
+                              : []
+                          }
                         />
                       </TableCell>
                     )}

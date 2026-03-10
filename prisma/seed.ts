@@ -3,6 +3,31 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+const PLAYER_NAMES = [
+  "გიორგი მამარდაშვილი",
+  "ნიკა ქველიძე",
+  "ლუკა კვირიკაშვილი",
+  "სანდრო კობახიძე",
+  "გიორგი ბერიძე",
+  "დავით ხომასურიძე",
+  "ოთო კობახიძე",
+  "გიორგი მიქელაძე",
+  "ვაჟა მარგველაშვილი",
+  "ლევან შენგელია",
+  "გიორგი ჩაკვეტაძე",
+  "გიორგი გველესიანი",
+  "გიორგი კაკუტია",
+  "გიორგი ცხადაძე",
+  "გიორგი ჯიქია",
+  "გიორგი ლორთქიფანიძე",
+  "გიორგი მაჭავარიანი",
+  "გიორგი ჩაკვეტაძე",
+  "გიორგი ქავთარაძე",
+  "გიორგი სირიბიძე",
+];
+
+const PLAYER_PASSWORD = "player123";
+
 async function main() {
   console.log("Cleaning database...");
 
@@ -17,6 +42,7 @@ async function main() {
   await prisma.user.deleteMany();
 
   const adminPassword = await bcrypt.hash("sbsmaster", 10);
+  const playerPassword = await bcrypt.hash(PLAYER_PASSWORD, 10);
 
   await prisma.user.create({
     data: {
@@ -28,8 +54,26 @@ async function main() {
     },
   });
 
+  const playerPhones: string[] = [];
+  for (let i = 0; i < 20; i++) {
+    const phone = `555123${String(i + 1).padStart(3, "0")}`;
+    playerPhones.push(phone);
+    await prisma.user.create({
+      data: {
+        fullName: PLAYER_NAMES[i],
+        email: `player${i + 1}@example.com`,
+        phone,
+        password: playerPassword,
+        role: "PLAYER",
+      },
+    });
+  }
+
   console.log("\nSeed complete!");
-  console.log(`  Admin: phone 591195233, password sbsmaster, email sabpachulia@gmail.com`);
+  console.log(`\nAdmin: phone 591195233, password sbsmaster, email sabpachulia@gmail.com`);
+  console.log(`\n20 players (no team) — password for all: ${PLAYER_PASSWORD}`);
+  console.log("\nPhone numbers:");
+  playerPhones.forEach((p, i) => console.log(`  ${i + 1}. ${p} — ${PLAYER_NAMES[i]}`));
 }
 
 main()

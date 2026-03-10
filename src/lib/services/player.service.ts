@@ -172,13 +172,15 @@ export const playerService = {
 
   /**
    * Captain or admin moves a member between ACTIVE and RESERVE.
-   * - Move to RESERVE: reserve count must be < max; cannot move captain (must assign new captain first)
-   * - Move to ACTIVE: active count must be < max
+   * - Move to RESERVE: reserve count must be < max (or use swapWithMemberId); cannot move captain
+   * - Move to ACTIVE: active count must be < max (or use swapWithMemberId)
+   * - When target list is full, swapWithMemberId must be provided to swap with a player from the target list
    */
   async updateMemberStatus(
     memberId: number,
     teamId: number,
-    newStatus: "ACTIVE" | "RESERVE"
+    newStatus: "ACTIVE" | "RESERVE",
+    swapWithMemberId?: number
   ) {
     const member = await prisma.teamMember.findFirst({
       where: { id: memberId, teamId, status: { not: "LEFT" } },
@@ -196,10 +198,39 @@ export const playerService = {
     if (newStatus === "RESERVE") {
       if (member.status === "RESERVE") throw new Error("Player is already a reserve");
       if (member.role === "CAPTAIN") throw new Error("Cannot move captain to reserve. Assign a new captain first.");
-      if (reserveCount >= maxReserve) throw new Error(`Reserve list is full (max ${maxReserve})`);
+      if (reserveCount >= maxReserve) {
+        if (!swapWithMemberId) throw new Error(`Reserve list is full. Swap with a reserve player.`);
+        const swapMember = await prisma.teamMember.findFirst({
+          where: { id: swapWithMemberId, teamId, status: "RESERVE" },
+        });
+        if (!swapMember) throw new Error("Swap player not found or not a reserve");
+        return prisma.$transaction(async (tx) => {
+          await tx.teamMember.update({ where: { id: swapWithMemberId }, data: { status: "ACTIVE" } });
+          return tx.teamMember.update({
+            where: { id: memberId },
+            data: { status: "RESERVE" },
+            include: { user: true },
+          });
+        });
+      }
     } else {
       if (member.status === "ACTIVE") throw new Error("Player is already active");
-      if (activeCount >= maxActive) throw new Error(`Active squad is full (max ${maxActive})`);
+      if (activeCount >= maxActive) {
+        if (!swapWithMemberId) throw new Error(`Active squad is full. Swap with an active player.`);
+        const swapMember = await prisma.teamMember.findFirst({
+          where: { id: swapWithMemberId, teamId, status: "ACTIVE" },
+        });
+        if (!swapMember) throw new Error("Swap player not found or not active");
+        if (swapMember.role === "CAPTAIN") throw new Error("Cannot swap with captain");
+        return prisma.$transaction(async (tx) => {
+          await tx.teamMember.update({ where: { id: swapWithMemberId }, data: { status: "RESERVE" } });
+          return tx.teamMember.update({
+            where: { id: memberId },
+            data: { status: "ACTIVE" },
+            include: { user: true },
+          });
+        });
+      }
     }
 
     return prisma.teamMember.update({

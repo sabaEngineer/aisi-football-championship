@@ -102,7 +102,7 @@ export function AddReserveButton({
   return (
     <>
       <div className="flex justify-center">
-        <Button variant="outline" onClick={() => setOpen(true)} className="gap-2">
+        <Button variant="default" size="lg" onClick={() => setOpen(true)} className="gap-2 shadow-lg hover:shadow-xl transition-shadow">
           <UserPlus className="h-4 w-4" />
           {`${ka.player.addReserve.replace("{n}", String(reserveCount)).replace("{max}", String(maxReserves))}`}
         </Button>

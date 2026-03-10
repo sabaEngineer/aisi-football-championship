@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Shuffle } from "lucide-react";
+import { Settings, Shuffle, Trash2 } from "lucide-react";
 import { ka } from "@/lib/ka";
 
 interface Props {
   championshipId: number;
+  championshipName: string;
+  championshipDescription: string | null;
   currentMaxTeams: number;
   currentMaxPlayersPerTeam: number;
   currentMaxReservesPerTeam: number;
@@ -20,6 +22,8 @@ interface Props {
 
 export function ChampionshipSettings({
   championshipId,
+  championshipName,
+  championshipDescription,
   currentMaxTeams,
   currentMaxPlayersPerTeam,
   currentMaxReservesPerTeam,
@@ -29,9 +33,29 @@ export function ChampionshipSettings({
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [generating, setGenerating] = useState(false);
+
+  async function handleDelete() {
+    if (!confirm(ka.settings.confirmDeleteChampionship)) return;
+    setDeleting(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/championships/${championshipId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.error);
+      } else {
+        router.push("/championships");
+        router.refresh();
+      }
+    } catch {
+      setError(ka.match.failedToSave);
+    }
+    setDeleting(false);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,11 +66,15 @@ export function ChampionshipSettings({
     const form = new FormData(e.currentTarget);
     const body: Record<string, unknown> = {};
 
+    const name = (form.get("name") as string)?.trim();
+    const description = (form.get("description") as string)?.trim() || null;
     const maxTeams = Number(form.get("maxTeams"));
     const maxPlayersPerTeam = Number(form.get("maxPlayersPerTeam"));
     const maxReservesPerTeam = Number(form.get("maxReservesPerTeam"));
     const status = form.get("status") as string;
 
+    if (name && name !== championshipName) body.name = name;
+    if (description !== (championshipDescription ?? "")) body.description = description || null;
     if (maxTeams !== currentMaxTeams) body.maxTeams = maxTeams;
     if (maxPlayersPerTeam !== currentMaxPlayersPerTeam) body.maxPlayersPerTeam = maxPlayersPerTeam;
     if (maxReservesPerTeam !== currentMaxReservesPerTeam) body.maxReservesPerTeam = maxReservesPerTeam;
@@ -84,8 +112,28 @@ export function ChampionshipSettings({
           {ka.settings.title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">{ka.championship.championshipName}</label>
+            <Input
+              name="name"
+              defaultValue={championshipName}
+              placeholder={ka.championship.championshipNamePlaceholder}
+              className="max-w-md"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">{ka.championship.description} <span className="text-muted-foreground font-normal">({ka.common.optional})</span></label>
+            <textarea
+              name="description"
+              defaultValue={championshipDescription ?? ""}
+              placeholder={ka.championship.descriptionPlaceholder}
+              rows={3}
+              className="flex w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          <div className="flex flex-wrap items-end gap-4">
           <div>
             <label className="text-sm font-medium">{ka.settings.numberOfTeams}</label>
             <Input
@@ -133,9 +181,28 @@ export function ChampionshipSettings({
           <Button type="submit" disabled={loading}>
             {loading ? ka.common.saving : ka.common.save}
           </Button>
+          </div>
         </form>
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         {success && <p className="text-sm text-green-600 mt-2">{success}</p>}
+      </CardContent>
+    </Card>
+
+    <Card className="border-destructive/30">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <Trash2 className="h-5 w-5" />
+          {ka.settings.deleteChampionship}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">
+          {ka.settings.confirmDeleteChampionship}
+        </p>
+        <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+          <Trash2 className="h-4 w-4 mr-2" />
+          {deleting ? ka.common.saving : ka.common.delete}
+        </Button>
       </CardContent>
     </Card>
 

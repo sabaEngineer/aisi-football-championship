@@ -12,22 +12,42 @@ import { Plus } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function TeamsPage() {
-  const [teams, session] = await Promise.all([
+  const session = await getSession();
+  const [teams, userChampionshipIds] = await Promise.all([
     prisma.team.findMany({
       include: {
-        championship: { select: { id: true, name: true, maxPlayersPerTeam: true } },
+        championship: { select: { id: true, name: true, maxPlayersPerTeam: true, maxReservesPerTeam: true } },
         _count: { select: { members: true } },
         members: {
-          where: { status: "ACTIVE" },
-          select: { id: true },
+          select: { status: true },
         },
       },
       orderBy: { name: "asc" },
     }),
-    getSession(),
+    session?.userId
+      ? prisma.teamMember.findMany({
+          where: { userId: session.userId, status: { not: "LEFT" } },
+          select: { team: { select: { championshipId: true } } },
+        }).then((ms) => new Set(ms.map((m) => m.team.championshipId)))
+      : Promise.resolve(new Set<number>()),
   ]);
 
   const isAdmin = session?.role === "ADMIN";
+  const isPlayer = session?.role === "PLAYER";
+
+  function teamNeedsPlayers(t: (typeof teams)[0]) {
+    const activeCount = t.members.filter((m) => m.status === "ACTIVE").length;
+    const reserveCount = t.members.filter((m) => m.status === "RESERVE").length;
+    const canJoinActive = activeCount < t.championship.maxPlayersPerTeam;
+    const canJoinReserve = activeCount >= t.championship.maxPlayersPerTeam && reserveCount < t.championship.maxReservesPerTeam;
+    return canJoinActive || canJoinReserve;
+  }
+
+  function canUserJoin(t: (typeof teams)[0]) {
+    if (!isPlayer || !session) return false;
+    if (userChampionshipIds.has(t.championship.id)) return false;
+    return teamNeedsPlayers(t);
+  }
 
   return (
     <div className="space-y-6">
@@ -54,28 +74,46 @@ export default async function TeamsPage() {
                   <TableHead>{ka.championship.teams}</TableHead>
                   <TableHead>{ka.team.championship}</TableHead>
                   <TableHead>{ka.team.activePlayers}</TableHead>
+                  <TableHead>{ka.team.reserve}</TableHead>
                   <TableHead>{ka.team.totalMembers}</TableHead>
+                  {isPlayer && <TableHead className="w-[100px]"></TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {teams.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell>
-                      <Link href={`/teams/${t.id}`} className="font-medium hover:underline">
-                        {t.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/championships/${t.championship.id}`} className="hover:underline text-muted-foreground">
-                        {t.championship.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      {t.members.length} / {t.championship.maxPlayersPerTeam}
-                    </TableCell>
-                    <TableCell>{t._count.members}</TableCell>
-                  </TableRow>
-                ))}
+                {teams.map((t) => {
+                  const activeCount = t.members.filter((m) => m.status === "ACTIVE").length;
+                  const reserveCount = t.members.filter((m) => m.status === "RESERVE").length;
+                  return (
+                    <TableRow key={t.id}>
+                      <TableCell>
+                        <Link href={`/teams/${t.id}`} className="font-medium hover:underline">
+                          {t.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/championships/${t.championship.id}`} className="hover:underline text-muted-foreground">
+                          {t.championship.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {activeCount} / {t.championship.maxPlayersPerTeam}
+                      </TableCell>
+                      <TableCell>
+                        {reserveCount} / {t.championship.maxReservesPerTeam}
+                      </TableCell>
+                      <TableCell>{t._count.members}</TableCell>
+                      {isPlayer && (
+                        <TableCell>
+                          {canUserJoin(t) ? (
+                            <Link href={`/teams/${t.id}`}>
+                              <Button size="sm" variant="default">{ka.team.join}</Button>
+                            </Link>
+                          ) : null}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

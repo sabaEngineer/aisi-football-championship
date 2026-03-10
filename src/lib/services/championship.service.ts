@@ -21,7 +21,17 @@ export const championshipService = {
   },
 
   async create(data: CreateChampionshipDto) {
-    return prisma.championship.create({ data });
+    const championship = await prisma.championship.create({ data });
+    await prisma.team.createMany({
+      data: Array.from({ length: data.maxTeams }, (_, i) => ({
+        championshipId: championship.id,
+        name: `გუნდი ${i + 1}`,
+      })),
+    });
+    return prisma.championship.findUniqueOrThrow({
+      where: { id: championship.id },
+      include: { teams: true },
+    });
   },
 
   async update(id: number, data: UpdateChampionshipDto) {

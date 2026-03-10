@@ -74,6 +74,7 @@ interface Props {
   currentUserId: number | null;
   currentUserRole: string | null;
   currentUserHasTeam: boolean;
+  hasBenchAbove?: boolean;
 }
 
 export function FootballPitch({
@@ -87,6 +88,7 @@ export function FootballPitch({
   currentUserId,
   currentUserRole,
   currentUserHasTeam,
+  hasBenchAbove = false,
 }: Props) {
   const router = useRouter();
   const pitchRef = useRef<HTMLDivElement>(null);
@@ -250,7 +252,7 @@ export function FootballPitch({
         onDrop={handlePitchDrop}
       >
         {saving && (
-          <div className="absolute inset-0 z-30 rounded-xl bg-black/30 flex items-center justify-center">
+          <div className={cn("absolute inset-0 z-30 bg-black/30 flex items-center justify-center", hasBenchAbove ? "rounded-b-xl" : "rounded-xl")}>
             <span className="text-white font-semibold text-sm bg-black/50 px-4 py-2 rounded-lg">
               {ka.pitch.saving}
             </span>
@@ -258,7 +260,7 @@ export function FootballPitch({
         )}
 
         {/* Pitch background */}
-        <div className="absolute inset-0 rounded-xl overflow-hidden bg-green-700 shadow-xl pointer-events-none">
+        <div className={cn("absolute inset-0 overflow-hidden bg-green-700 shadow-xl pointer-events-none", hasBenchAbove ? "rounded-b-xl" : "rounded-xl")}>
           <div className="absolute inset-0" style={{
             background: "repeating-linear-gradient(to right, #2d8a4e 0px, #2d8a4e 9.09%, #278544 9.09%, #278544 18.18%)"
           }} />

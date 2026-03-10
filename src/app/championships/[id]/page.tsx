@@ -39,6 +39,28 @@ export default async function ChampionshipTeamsTab({
   if (!championship) notFound();
 
   const isAdmin = session?.role === "ADMIN";
+  const isPlayer = session?.role === "PLAYER";
+
+  const currentUserHasTeamInChampionship = session
+    ? await prisma.teamMember.findFirst({
+        where: {
+          userId: session.userId,
+          status: { not: "LEFT" },
+          team: { championshipId: championship.id },
+        },
+      })
+    : null;
+
+  const userCanJoin = isPlayer && session && !currentUserHasTeamInChampionship;
+
+  const champ = championship;
+  function teamNeedsPlayers(team: { members: { status: string }[] }) {
+    const activeCount = team.members.filter((m) => m.status === "ACTIVE").length;
+    const reserveCount = team.members.filter((m) => m.status === "RESERVE").length;
+    const canJoinActive = activeCount < champ.maxPlayersPerTeam;
+    const canJoinReserve = activeCount >= champ.maxPlayersPerTeam && reserveCount < champ.maxReservesPerTeam;
+    return canJoinActive || canJoinReserve;
+  }
 
   return (
     <Card>
@@ -65,6 +87,7 @@ export default async function ChampionshipTeamsTab({
                 <TableHead>{ka.team.activePlayers}</TableHead>
                 <TableHead>{ka.team.reserve}</TableHead>
                 <TableHead>{ka.team.captain}</TableHead>
+                {isPlayer && <TableHead className="w-[100px]"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -72,6 +95,7 @@ export default async function ChampionshipTeamsTab({
                 const captain = team.members.find((m) => m.role === "CAPTAIN" && m.status === "ACTIVE");
                 const activeCount = team.members.filter((m) => m.status === "ACTIVE").length;
                 const reserveCount = team.members.filter((m) => m.status === "RESERVE").length;
+                const canJoin = userCanJoin && teamNeedsPlayers(team);
                 return (
                   <TableRow key={team.id}>
                     <TableCell>
@@ -82,8 +106,17 @@ export default async function ChampionshipTeamsTab({
                     <TableCell>
                       {activeCount} / {championship.maxPlayersPerTeam}
                     </TableCell>
-                    <TableCell>{reserveCount}</TableCell>
+                    <TableCell>{reserveCount} / {championship.maxReservesPerTeam}</TableCell>
                     <TableCell>{captain?.user.fullName || "\u2014"}</TableCell>
+                    {isPlayer && (
+                      <TableCell>
+                        {canJoin ? (
+                          <Link href={`/teams/${team.id}`}>
+                            <Button size="sm" variant="default">{ka.team.join}</Button>
+                          </Link>
+                        ) : null}
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}

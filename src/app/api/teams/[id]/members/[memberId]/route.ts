@@ -7,6 +7,7 @@ import { success, error, parseBody, getIdParam } from "@/lib/api-helpers";
 
 const updateStatusSchema = z.object({
   status: z.enum(["ACTIVE", "RESERVE"]),
+  swapWithMemberId: z.number().int().positive().optional(),
 });
 
 type Params = { params: Promise<{ id: string; memberId: string }> };
@@ -37,7 +38,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const parsed = await parseBody(request, updateStatusSchema);
     if (parsed.error) return parsed.error;
 
-    const member = await playerService.updateMemberStatus(memberId, teamId, parsed.data.status);
+    const member = await playerService.updateMemberStatus(
+      memberId,
+      teamId,
+      parsed.data.status,
+      parsed.data.swapWithMemberId
+    );
     return success(member);
   } catch (err) {
     return error((err as Error).message, 400);
