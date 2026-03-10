@@ -58,11 +58,12 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  teamMemberships TeamMember[]
-  matchStaff      MatchStaff[]
-  matchStats      MatchPlayerStat[]
-  supportMessages SupportMessage[]
-  supportReplies  SupportMessage[] @relation("AdminReplies")
+  teamMemberships   TeamMember[]
+  matchStaff        MatchStaff[]
+  matchStats        MatchPlayerStat[]
+  supportMessages  SupportMessage[]
+  supportReplies   SupportMessage[] @relation("AdminReplies")
+  nominationWins   NominationWinner[]
 }
 
 // ─── SupportMessage (user to admin chat) ──────────────────────────────────────
@@ -96,9 +97,10 @@ model Championship {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  teams    Team[]
-  matches  Match[]
-  sponsors ChampionshipSponsor[]
+  teams       Team[]
+  matches     Match[]
+  sponsors    ChampionshipSponsor[]
+  nominations Nomination[]
 }
 
 // ─── Team ────────────────────────────────────────────────────────────────────
@@ -110,12 +112,13 @@ model Team {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  championship  Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  championship  Championship     @relation(fields: [championshipId], references: [id], onDelete: Cascade)
   members       TeamMember[]
-  homeMatches   Match[]      @relation("HomeTeam")
-  awayMatches   Match[]      @relation("AwayTeam")
-  winnerMatches Match[]      @relation("MatchWinner")
+  homeMatches   Match[]          @relation("HomeTeam")
+  awayMatches   Match[]          @relation("AwayTeam")
+  winnerMatches Match[]          @relation("MatchWinner")
   matchStats    MatchPlayerStat[]
+  nominationWins NominationWinner[]
 
   @@unique([championshipId, name])
 }
@@ -211,6 +214,36 @@ model Sponsor {
   updatedAt DateTime @updatedAt
 
   championships ChampionshipSponsor[]
+  nominations   Nomination[]
+}
+
+// ─── Nomination (awards/prizes per championship) ───────────────────────────────
+
+model Nomination {
+  id             Int      @id @default(autoincrement())
+  championshipId Int
+  name           String
+  prize          String?
+  sponsorId      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  championship Championship      @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  sponsor      Sponsor?          @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
+  winner       NominationWinner?
+}
+
+model NominationWinner {
+  id           Int      @id @default(autoincrement())
+  nominationId Int      @unique
+  userId       Int?     // player or staff member
+  teamId       Int?     // whole team
+  awardedAt   DateTime @default(now())
+
+  nomination Nomination @relation(fields: [nominationId], references: [id], onDelete: Cascade)
+  user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team       Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
 
 // ─── ChampionshipSponsor (many-to-many) ──────────────────────────────────────

@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Shield, Users, CalendarDays, UserCog, Handshake, Settings } from "lucide-react";
+import { Shield, Users, CalendarDays, UserCog, Handshake, Trophy, Settings } from "lucide-react";
 import { ka } from "@/lib/ka";
 
-const tabs = [
+const playerTabs = [
   { segment: "", label: ka.tabs.teams, icon: Shield },
   { segment: "/players", label: ka.tabs.players, icon: Users },
   { segment: "/matches", label: ka.tabs.matches, icon: CalendarDays },
-  { segment: "/staff", label: ka.tabs.staff, icon: UserCog },
-  { segment: "/sponsors", label: ka.tabs.sponsors, icon: Handshake },
+  { segment: "/prizes", label: ka.tabs.prizes, icon: Trophy },
 ];
 
-const adminTabs = [
+const adminOnlyTabs = [
+  { segment: "/staff", label: ka.tabs.staff, icon: UserCog },
+  { segment: "/sponsors", label: ka.tabs.sponsors, icon: Handshake },
   { segment: "/settings", label: ka.tabs.settings, icon: Settings },
 ];
 
@@ -28,7 +29,7 @@ export function ChampionshipTabs({
   const pathname = usePathname();
   const base = `/championships/${championshipId}`;
 
-  const allTabs = isAdmin ? [...tabs, ...adminTabs] : tabs;
+  const allTabs = isAdmin ? [...playerTabs, ...adminOnlyTabs] : playerTabs;
 
   function isActive(segment: string) {
     const full = base + segment;

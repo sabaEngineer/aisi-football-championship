@@ -6,11 +6,13 @@ import { verifyToken } from "@/lib/auth";
 const ADMIN_ONLY_PAGES = ["/championships/new", "/sponsors/new", "/staff/new"];
 
 // API mutations only admins can perform
-const ADMIN_ONLY_API: { path: string; methods: string[]; matchSuffix?: string; excludeSuffix?: string }[] = [
+const ADMIN_ONLY_API: { path: string; methods: string[]; matchSuffix?: string; matchContains?: string; excludeSuffix?: string }[] = [
   { path: "/api/championships", methods: ["POST"] },
   { path: "/api/championships/", methods: ["PATCH", "DELETE"] },
   { path: "/api/championships/", matchSuffix: "/fixtures", methods: ["POST"] },
   { path: "/api/championships/", matchSuffix: "/sponsors", methods: ["POST"] },
+  { path: "/api/championships/", matchSuffix: "/nominations", methods: ["POST"] },
+  { path: "/api/championships/", matchContains: "/nominations/", methods: ["PATCH", "DELETE"] },
   { path: "/api/teams", methods: ["POST"] },
   { path: "/api/teams/", methods: ["DELETE"] },
   { path: "/api/sponsors", methods: ["POST"] },
@@ -27,6 +29,9 @@ function isAdminOnlyApi(pathname: string, method: string): boolean {
     if (!rule.methods.includes(method)) return false;
     if (rule.matchSuffix) {
       return pathname.includes(rule.path) && pathname.endsWith(rule.matchSuffix);
+    }
+    if (rule.matchContains) {
+      return pathname.includes(rule.path) && pathname.includes(rule.matchContains);
     }
     if (rule.excludeSuffix && pathname.endsWith(rule.excludeSuffix)) return false;
     const exactMatch = pathname === rule.path;
