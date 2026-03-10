@@ -63,7 +63,7 @@ export const ka = {
     fullNamePlaceholder: "მაგ. გიორგი მამარდაშვილი",
     phone: "ტელეფონის ნომერი",
     phonePlaceholder: "+995 555 123 456",
-    phonePlaceholderFlexible: "555 123 456 ან +995 555 123 456",
+    phonePlaceholderFlexible: "+995 555 123 456",
     phoneInvalid: "შეიყვანე სწორი ქართული ნომერი (მაგ. +995 555 123 456)",
     password: "პაროლი",
     passwordPlaceholder: "შეიყვანე პაროლი",

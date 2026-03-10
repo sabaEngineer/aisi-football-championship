@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,11 @@ import { ka } from "@/lib/ka";
 
 export const dynamic = "force-dynamic";
 
-export default async function LandingPage() {
-  const [session, stats] = await Promise.all([
-    getSession(),
+export default async function HomePage() {
+  const session = await getSession();
+  if (session) redirect("/championships");
+
+  const stats = await Promise.all([
     Promise.all([
       prisma.championship.count(),
       prisma.team.count(),
@@ -81,9 +84,9 @@ export default async function LandingPage() {
                 {ka.landing.viewChampionships}
               </Button>
             </Link>
-            <Link href={session ? "/championships" : "/register"}>
+            <Link href="/register">
               <Button size="lg" className="bg-green-600 text-white border-2 border-green-400 hover:bg-green-500 text-base px-8 h-12 font-semibold">
-                {session ? ka.landing.myDashboard : ka.landing.joinAsPlayer}
+                {ka.landing.joinAsPlayer}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </Link>

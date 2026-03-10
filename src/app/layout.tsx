@@ -12,6 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "აისის ფეხბურთის ჩემპიონატი",
   description: "ფეხბურთის ჩემპიონატის მართვა — გუნდები, მატჩები, მოთამაშეები და სხვა.",
+  icons: { icon: "/aisi-logo.png", apple: "/aisi-logo.png" },
 };
 
 export default async function RootLayout({

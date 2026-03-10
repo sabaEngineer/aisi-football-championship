@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Trophy, LogOut, User, LogIn, Users } from "lucide-react";
+import { LogOut, User, LogIn, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ka } from "@/lib/ka";
@@ -24,9 +25,15 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="/championships" className="flex items-center gap-2 font-bold text-lg">
-          <Trophy className="h-5 w-5 text-primary" />
-          <span>ჩემპიონატი</span>
+        <Link href="/" className="flex items-center gap-2.5 font-bold text-lg">
+          <Image
+            src="/aisi-logo.png"
+            alt="აისი"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+          {/* <span>აისური ფეხბურთი</span> */}
         </Link>
 
         {user ? (
