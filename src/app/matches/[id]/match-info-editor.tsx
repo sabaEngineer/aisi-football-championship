@@ -1,12 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pencil, Check, X, MapPin, Clock, Calendar, FileText, ExternalLink } from "lucide-react";
 import { ka } from "@/lib/ka";
+
+const STORAGE_KEY = "matchInfoDefaults";
+
+function getStoredDefaults(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const s = sessionStorage.getItem(STORAGE_KEY);
+    return s ? JSON.parse(s) : {};
+  } catch {
+    return {};
+  }
+}
+
+function storeDefaults(data: { date: string | null; time: string | null; location: string | null; locationUrl: string | null; description: string | null }) {
+  if (typeof window === "undefined") return;
+  try {
+    const clean: Record<string, string> = {};
+    if (data.date) clean.date = data.date;
+    if (data.time) clean.time = data.time;
+    if (data.location) clean.location = data.location;
+    if (data.locationUrl) clean.locationUrl = data.locationUrl;
+    if (data.description) clean.description = data.description;
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+  } catch {
+    // ignore
+  }
+}
+
+interface SuggestedDefaults {
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  locationUrl: string | null;
+  description: string | null;
+}
 
 interface Props {
   matchId: number;
@@ -15,20 +50,37 @@ interface Props {
   location: string | null;
   locationUrl: string | null;
   description: string | null;
+  suggestedDefaults: SuggestedDefaults | null;
   isAdmin: boolean;
 }
 
-export function MatchInfoEditor({ matchId, date, time, location, locationUrl, description, isAdmin }: Props) {
+function getDefault(val: string | null, suggested: string | null | undefined, stored: string | undefined): string {
+  return val ?? suggested ?? stored ?? "";
+}
+
+export function MatchInfoEditor({ matchId, date, time, location, locationUrl, description, suggestedDefaults, isAdmin }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [formDate, setFormDate] = useState(date ?? "");
-  const [formTime, setFormTime] = useState(time ?? "");
-  const [formLocation, setFormLocation] = useState(location ?? "");
-  const [formLocationUrl, setFormLocationUrl] = useState(locationUrl ?? "");
-  const [formDescription, setFormDescription] = useState(description ?? "");
+  const stored = getStoredDefaults();
+  const sug = suggestedDefaults;
+  const [formDate, setFormDate] = useState(getDefault(date, sug?.date ?? null, stored.date));
+  const [formTime, setFormTime] = useState(getDefault(time, sug?.time ?? null, stored.time));
+  const [formLocation, setFormLocation] = useState(getDefault(location, sug?.location ?? null, stored.location));
+  const [formLocationUrl, setFormLocationUrl] = useState(getDefault(locationUrl, sug?.locationUrl ?? null, stored.locationUrl));
+  const [formDescription, setFormDescription] = useState(getDefault(description, sug?.description ?? null, stored.description));
+
+  // When props change (navigate to different match), merge: match value > suggested > stored
+  useEffect(() => {
+    const s = getStoredDefaults();
+    setFormDate(getDefault(date, sug?.date ?? null, s.date));
+    setFormTime(getDefault(time, sug?.time ?? null, s.time));
+    setFormLocation(getDefault(location, sug?.location ?? null, s.location));
+    setFormLocationUrl(getDefault(locationUrl, sug?.locationUrl ?? null, s.locationUrl));
+    setFormDescription(getDefault(description, sug?.description ?? null, s.description));
+  }, [matchId, date, time, location, locationUrl, description, sug?.date, sug?.time, sug?.location, sug?.locationUrl, sug?.description]);
 
   async function handleSave() {
     setSaving(true);
@@ -62,6 +114,13 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
       if (!data.success) {
         setError(data.error);
       } else {
+        storeDefaults({
+          date: newDate,
+          time: newTime,
+          location: newLocation,
+          locationUrl: newLocationUrl,
+          description: newDescription,
+        });
         setEditing(false);
         router.refresh();
       }
@@ -158,6 +217,11 @@ export function MatchInfoEditor({ matchId, date, time, location, locationUrl, de
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {suggestedDefaults && !date && !time && !location && (
+          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
+            {ka.match.suggestedFromOtherMatch}
+          </p>
+        )}
         {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

@@ -102,6 +102,39 @@ export default async function MatchDetailPage({
       })
     : [];
 
+  // When current match is empty, find another match in championship with date/time/location to suggest
+  const currentMatchEmpty = !match.date && !match.time && !match.location;
+  const suggestedFrom = currentMatchEmpty && isAdmin
+    ? await prisma.match.findFirst({
+        where: {
+          championshipId: match.championshipId,
+          id: { not: match.id },
+          OR: [
+            { date: { not: null } },
+            { time: { not: null } },
+            { location: { not: null } },
+          ],
+        },
+        select: {
+          date: true,
+          time: true,
+          location: true,
+          locationUrl: true,
+          description: true,
+        },
+      })
+    : null;
+
+  const suggestedDefaults = suggestedFrom
+    ? {
+        date: suggestedFrom.date ? suggestedFrom.date.toISOString().split("T")[0] : null,
+        time: suggestedFrom.time,
+        location: suggestedFrom.location,
+        locationUrl: suggestedFrom.locationUrl,
+        description: suggestedFrom.description,
+      }
+    : null;
+
   return (
     <div className="space-y-6">
       <div>
@@ -154,6 +187,7 @@ export default async function MatchDetailPage({
         location={match.location}
         locationUrl={match.locationUrl}
         description={match.description}
+        suggestedDefaults={suggestedDefaults}
         isAdmin={isAdmin}
       />
 

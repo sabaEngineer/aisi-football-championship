@@ -151,7 +151,11 @@ export default async function TeamDetailPage({
               <TableBody>
                 {active.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.user.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/players/${m.userId}`} className="hover:underline">
+                        {m.user.fullName}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <PositionSelect
                         memberId={m.id}
@@ -205,7 +209,11 @@ export default async function TeamDetailPage({
               <TableBody>
                 {reserve.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.user.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/players/${m.userId}`} className="hover:underline">
+                        {m.user.fullName}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <PositionSelect
                         memberId={m.id}

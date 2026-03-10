@@ -30,7 +30,7 @@ export default async function ChampionshipLayout({
   const [championship, session] = await Promise.all([
     prisma.championship.findUnique({
       where: { id },
-      select: { id: true, name: true, status: true, maxTeams: true, maxPlayersPerTeam: true },
+      select: { id: true, name: true, description: true, status: true, maxTeams: true, maxPlayersPerTeam: true },
     }),
     getSession(),
   ]);
@@ -51,6 +51,9 @@ export default async function ChampionshipLayout({
             <p className="text-white/80 mt-0.5 text-sm">
               {`${championship.maxTeams} ${ka.championship.teams} · ${championship.maxPlayersPerTeam} მოთამაშე თითოეულში`}
             </p>
+            {championship.description && (
+              <p className="text-white/70 mt-2 text-sm max-w-2xl">{championship.description}</p>
+            )}
           </div>
           <Badge className={statusColor[championship.status] || "bg-white/20 text-white"}>
             {ka.championship.status[championship.status as keyof typeof ka.championship.status] || championship.status}

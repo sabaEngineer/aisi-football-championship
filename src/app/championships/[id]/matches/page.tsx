@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TournamentBracket } from "@/components/tournament-bracket";
+import { CalendarModalTrigger } from "@/components/calendar-modal-trigger";
 import { MatchScoreEntry } from "./match-score-entry";
 import { ka } from "@/lib/ka";
 
@@ -17,7 +18,11 @@ export default async function ChampionshipMatchesTab({
   const id = Number(rawId);
   if (isNaN(id)) notFound();
 
-  const [matches, session] = await Promise.all([
+  const [championship, matches, session] = await Promise.all([
+    prisma.championship.findUnique({
+      where: { id },
+      select: { name: true },
+    }),
     prisma.match.findMany({
       where: { championshipId: id },
       include: {
@@ -31,6 +36,8 @@ export default async function ChampionshipMatchesTab({
   ]);
 
   const isAdmin = session?.role === "ADMIN";
+
+  if (!championship) notFound();
 
   if (matches.length === 0) {
     return (
@@ -66,8 +73,25 @@ export default async function ChampionshipMatchesTab({
       !(m.homeTeam === null && m.awayTeam === null)
   );
 
+  const calendarMatches = matches.map((m) => ({
+    id: m.id,
+    date: m.date,
+    time: m.time,
+    homeTeam: m.homeTeam ? { id: m.homeTeam.id, name: m.homeTeam.name } : null,
+    awayTeam: m.awayTeam ? { id: m.awayTeam.id, name: m.awayTeam.name } : null,
+    status: m.status,
+  }));
+
+  const hasAnyScheduledDate = calendarMatches.some((m) => m.date !== null);
+
   return (
     <div className="space-y-6">
+      {hasAnyScheduledDate && (
+        <div className="flex justify-start">
+          <CalendarModalTrigger matches={calendarMatches} championshipName={championship.name} />
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{ka.match.tournamentBracket}</CardTitle>

@@ -28,6 +28,16 @@ export default async function ChampionshipsPage() {
 
   const isAdmin = session?.role === "ADMIN";
 
+  // For logged-in users: which championships they're in (via team membership)
+  const registeredChampionshipIds = session
+    ? new Set(
+        (await prisma.teamMember.findMany({
+          where: { userId: session.userId, status: { not: "LEFT" } },
+          include: { team: { select: { championshipId: true } } },
+        })).map((m) => m.team.championshipId)
+      )
+    : new Set<number>();
+
   return (
     <div className="space-y-6">
       {/* Green banner at the top */}
@@ -80,6 +90,11 @@ export default async function ChampionshipsPage() {
                   <p className="text-xs text-muted-foreground mt-3">
                     {`მაქს. ${c.maxPlayersPerTeam} მოთამაშე გუნდში`}
                   </p>
+                  {session && registeredChampionshipIds.has(c.id) && (
+                    <p className="text-xs mt-2 font-semibold text-green-600">
+                      {ka.championship.yourChampionship}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </Link>

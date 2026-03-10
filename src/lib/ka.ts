@@ -94,6 +94,8 @@ export const ka = {
     createTitle: "ჩემპიონატის შექმნა",
     championshipName: "ჩემპიონატის სახელი",
     championshipNamePlaceholder: "მაგ. საგაზაფხულო ლიგა 2026",
+    description: "აღწერა",
+    descriptionPlaceholder: "ჩემპიონატის მოკლე აღწერა (არასავალდებულო)",
     maxTeams: "მაქსიმუმ გუნდები",
     maxPlayersTeam: "მოთამაშეები / გუნდი",
     creating: "იქმნება...",
@@ -106,6 +108,7 @@ export const ka = {
       COMPLETED: "დასრულებული",
       CANCELLED: "გაუქმებული",
     },
+    yourChampionship: "შენი ჩემპიონატი",
   },
 
   tabs: {
@@ -212,6 +215,11 @@ export const ka = {
       COMPLETED: "დასრულებული",
       CANCELLED: "გაუქმებული",
     } as Record<string, string>,
+    schedule: "განრიგი",
+    seeMatchesCalendar: "მატჩების კალენდრის ნახვა",
+    noDatesYet: "თარიღები ჯერ არ არის. ადმინი დააყენებს მატჩების თარიღებს.",
+    viewMatch: "მატჩის ნახვა",
+    suggestedFromOtherMatch: "შემოთავაზებულია სხვა მატჩიდან. გააკეთე მცირე ცვლილებები და შეინახე.",
   },
 
   staff: {
@@ -264,6 +272,15 @@ export const ka = {
   },
 
   player: {
+    profileTitle: "მოთამაშის პროფილი",
+    statistics: "სტატისტიკა",
+    matchesPlayed: "მატჩი",
+    goals: "გოლი",
+    assists: "პასი",
+    history: "ისტორია",
+    shareProfile: "ბმულის კოპირება",
+    linkCopied: "კოპირებულია!",
+    noHistory: "ჯერ არ არის გუნდებში",
     /** 4 პოზიციის კატეგორია */
     positionMap: {
       GK: "მეკარე",

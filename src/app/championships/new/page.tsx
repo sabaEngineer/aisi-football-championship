@@ -18,8 +18,10 @@ export default function NewChampionshipPage() {
     setError("");
 
     const form = new FormData(e.currentTarget);
+    const desc = (form.get("description") as string)?.trim();
     const body = {
       name: form.get("name") as string,
+      description: desc || undefined,
       maxTeams: Number(form.get("maxTeams")),
       maxPlayersPerTeam: Number(form.get("maxPlayersPerTeam")),
     };
@@ -53,6 +55,15 @@ export default function NewChampionshipPage() {
             <div>
               <label className="text-sm font-medium">{ka.championship.championshipName}</label>
               <Input name="name" placeholder={ka.championship.championshipNamePlaceholder} required />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{ka.championship.description} <span className="text-muted-foreground font-normal">({ka.common.optional})</span></label>
+              <textarea
+                name="description"
+                placeholder={ka.championship.descriptionPlaceholder}
+                rows={3}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

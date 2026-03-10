@@ -53,7 +53,11 @@ export default async function ChampionshipPlayersTab({
               <TableBody>
                 {active.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.user.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/players/${m.userId}`} className="hover:underline">
+                        {m.user.fullName}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <Link href={`/teams/${m.team.id}`} className="hover:underline">
                         {m.team.name}
@@ -92,7 +96,11 @@ export default async function ChampionshipPlayersTab({
               <TableBody>
                 {reserve.map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="font-medium">{m.user.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/players/${m.userId}`} className="hover:underline">
+                        {m.user.fullName}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <Link href={`/teams/${m.team.id}`} className="hover:underline">
                         {m.team.name}
