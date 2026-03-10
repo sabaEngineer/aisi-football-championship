@@ -10,6 +10,7 @@ import {
 import { FootballPitch, type PitchPlayer } from "@/components/football-pitch";
 import { AddReserveButton } from "./add-reserve-button";
 import { LeaveTeamButton } from "./leave-team-button";
+import { MoveStatusButton } from "./move-status-button";
 import { EditTeamName } from "./edit-team-name";
 import { PositionSelect } from "@/components/position-select";
 import { Crown } from "lucide-react";
@@ -113,8 +114,9 @@ export default async function TeamDetailPage({
         currentUserHasTeam={currentUserHasTeam}
       />
 
-      {/* Add Reserve button — when team active is full but reserves have room */}
+      {/* Add Reserve button — when team active is full and reserves have room (so new joiners go to reserve) */}
       {(isAdmin || (session?.role === "PLAYER" && !currentUserHasTeam)) &&
+        active.length >= team.championship.maxPlayersPerTeam &&
         reserve.length < team.championship.maxReservesPerTeam && (
         <AddReserveButton
           teamId={team.id}
@@ -145,6 +147,7 @@ export default async function TeamDetailPage({
                   <TableHead>{ka.team.position}</TableHead>
                   <TableHead>{ka.team.role}</TableHead>
                   <TableHead>{ka.team.joined}</TableHead>
+                  {(isAdmin || isCaptain) && <TableHead></TableHead>}
                   {isAdmin && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
@@ -177,6 +180,17 @@ export default async function TeamDetailPage({
                     <TableCell className="text-muted-foreground text-sm">
                       {new Date(m.joinedAt).toLocaleDateString()}
                     </TableCell>
+                    {(isAdmin || isCaptain) && (
+                      <TableCell>
+                        <MoveStatusButton
+                          memberId={m.id}
+                          teamId={team.id}
+                          currentStatus="ACTIVE"
+                          canMoveToReserve={m.role !== "CAPTAIN" && reserve.length < team.championship.maxReservesPerTeam}
+                          canMoveToActive={false}
+                        />
+                      </TableCell>
+                    )}
                     {isAdmin && (
                       <TableCell>
                         <LeaveTeamButton userId={m.userId} teamId={team.id} playerName={m.user.fullName} />
@@ -203,6 +217,7 @@ export default async function TeamDetailPage({
                   <TableHead>{ka.team.player}</TableHead>
                   <TableHead>{ka.team.position}</TableHead>
                   <TableHead>{ka.team.joined}</TableHead>
+                  {(isAdmin || isCaptain) && <TableHead></TableHead>}
                   {isAdmin && <TableHead></TableHead>}
                 </TableRow>
               </TableHeader>
@@ -225,6 +240,17 @@ export default async function TeamDetailPage({
                     <TableCell className="text-muted-foreground text-sm">
                       {new Date(m.joinedAt).toLocaleDateString()}
                     </TableCell>
+                    {(isAdmin || isCaptain) && (
+                      <TableCell>
+                        <MoveStatusButton
+                          memberId={m.id}
+                          teamId={team.id}
+                          currentStatus="RESERVE"
+                          canMoveToReserve={false}
+                          canMoveToActive={active.length < team.championship.maxPlayersPerTeam}
+                        />
+                      </TableCell>
+                    )}
                     {isAdmin && (
                       <TableCell>
                         <LeaveTeamButton userId={m.userId} teamId={team.id} playerName={m.user.fullName} />

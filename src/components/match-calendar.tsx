@@ -13,6 +13,7 @@ type MatchItem = {
   homeTeam: { id: number; name: string } | null;
   awayTeam: { id: number; name: string } | null;
   status: string;
+  roundLabel?: string;
 };
 
 function getMonday(d: Date): Date {
@@ -167,7 +168,9 @@ export function MatchCalendar({
                       className="block p-2 rounded-lg bg-background/80 hover:bg-green-100 dark:hover:bg-green-900/50 border border-green-200/50 dark:border-green-800/50 transition-colors"
                     >
                       <p className="text-xs font-medium text-foreground leading-tight">
-                        {m.homeTeam?.name ?? ka.match.tbd} {ka.common.vs} {m.awayTeam?.name ?? ka.match.tbd}
+                        {m.homeTeam && m.awayTeam
+                          ? `${m.homeTeam.name} ${ka.common.vs} ${m.awayTeam.name}`
+                          : (m.roundLabel ?? ka.match.tbd)}
                       </p>
                       {m.time && (
                         <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-0.5">{m.time}</p>

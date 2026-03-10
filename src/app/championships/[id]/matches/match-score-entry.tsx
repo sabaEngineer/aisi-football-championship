@@ -96,39 +96,45 @@ function MatchRow({
   const [awayScore, setAwayScore] = useState(match.awayScore);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border p-3">
-      <span className="text-xs text-muted-foreground font-medium w-24 shrink-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-3 sm:p-4">
+      <span className="text-xs text-muted-foreground font-medium shrink-0">
         {getRoundLabel(match.round, totalRounds)}
       </span>
-      <span className="font-medium text-sm truncate flex-1 text-right">
-        {match.homeTeam?.name ?? ka.match.tbd}
-      </span>
-      <Input
-        type="number"
-        min={0}
-        value={homeScore}
-        onChange={(e) => setHomeScore(Number(e.target.value))}
-        className="w-14 text-center"
-      />
-      <span className="text-muted-foreground text-xs">{ka.common.vs}</span>
-      <Input
-        type="number"
-        min={0}
-        value={awayScore}
-        onChange={(e) => setAwayScore(Number(e.target.value))}
-        className="w-14 text-center"
-      />
-      <span className="font-medium text-sm truncate flex-1">
-        {match.awayTeam?.name ?? ka.match.tbd}
-      </span>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 sm:flex-1 sm:justify-end">
+          <span className="font-medium text-sm truncate min-w-0">
+            {match.homeTeam?.name ?? ka.match.tbd}
+          </span>
+          <Input
+            type="number"
+            min={0}
+            value={homeScore}
+            onChange={(e) => setHomeScore(Number(e.target.value))}
+            className="w-14 shrink-0 text-center h-10"
+          />
+        </div>
+        <span className="text-muted-foreground text-xs text-center sm:shrink-0">{ka.common.vs}</span>
+        <div className="flex items-center justify-between gap-2 sm:flex-1">
+          <Input
+            type="number"
+            min={0}
+            value={awayScore}
+            onChange={(e) => setAwayScore(Number(e.target.value))}
+            className="w-14 shrink-0 text-center h-10"
+          />
+          <span className="font-medium text-sm truncate min-w-0 text-right">
+            {match.awayTeam?.name ?? ka.match.tbd}
+          </span>
+        </div>
+      </div>
       <Button
         size="sm"
         variant="outline"
-        className="shrink-0"
+        className="shrink-0 w-full sm:w-auto h-10"
         disabled={saving}
         onClick={() => onSave(match.id, homeScore, awayScore)}
       >
-        <Check className="h-4 w-4 mr-1" />
+        <Check className="h-4 w-4 sm:mr-1" />
         {saving ? "..." : ka.common.save}
       </Button>
     </div>

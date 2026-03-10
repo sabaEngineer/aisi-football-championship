@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { MatchCalendar } from "@/components/match-calendar";
 import { ka } from "@/lib/ka";
@@ -20,6 +19,7 @@ type MatchItem = {
   homeTeam: { id: number; name: string } | null;
   awayTeam: { id: number; name: string } | null;
   status: string;
+  roundLabel?: string;
 };
 
 export function CalendarModalTrigger({
@@ -35,22 +35,23 @@ export function CalendarModalTrigger({
   if (!hasAnyDate) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="gap-2 bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all border-0"
-        >
-          <CalendarDays className="h-4 w-4" />
-          {ka.match.seeMatchesCalendar}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
+    <>
+      <Button
+        size="sm"
+        className="gap-2 bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all border-0"
+        onClick={() => setOpen(true)}
+      >
+        <CalendarDays className="h-4 w-4" />
+        {ka.match.seeMatchesCalendar}
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{ka.match.schedule}</DialogTitle>
         </DialogHeader>
         <MatchCalendar matches={matches} championshipName={championshipName} />
       </DialogContent>
-    </Dialog>
+      </Dialog>
+    </>
   );
 }

@@ -66,9 +66,12 @@ export default async function MatchDetailPage({
   ]);
 
   if (!match) notFound();
-  if (!match.homeTeam || !match.awayTeam) notFound();
 
   const isAdmin = session?.role === "ADMIN";
+  const hasTeams = match.homeTeam !== null && match.awayTeam !== null;
+
+  // Non-admins cannot view matches where teams are not yet known (semi-final, final TBD)
+  if (!hasTeams && !isAdmin) notFound();
 
   const totalRounds = await prisma.match.aggregate({
     where: { championshipId: match.championshipId },
@@ -77,23 +80,23 @@ export default async function MatchDetailPage({
   const maxRound = totalRounds._max.round ?? 1;
   const roundLabel = getRoundLabel(match.round ?? 1, maxRound);
 
-  const homeMembers = match.homeTeam.members.map((m) => ({
+  const homeMembers = match.homeTeam?.members.map((m) => ({
     id: m.id,
     fullName: m.user.fullName,
     position: m.position || m.user.position || "?",
     positionX: m.positionX,
     positionY: m.positionY,
     role: m.role as "CAPTAIN" | "PLAYER",
-  }));
+  })) ?? [];
 
-  const awayMembers = match.awayTeam.members.map((m) => ({
+  const awayMembers = match.awayTeam?.members.map((m) => ({
     id: m.id,
     fullName: m.user.fullName,
     position: m.position || m.user.position || "?",
     positionX: m.positionX,
     positionY: m.positionY,
     role: m.role as "CAPTAIN" | "PLAYER",
-  }));
+  })) ?? [];
 
   const staffUsers = isAdmin
     ? await prisma.user.findMany({
@@ -151,7 +154,7 @@ export default async function MatchDetailPage({
           <div>
             <p className="text-white/80 text-sm font-medium">{match.championship.name} · {roundLabel}</p>
             <div className="flex items-center gap-4 mt-2">
-              <span className="text-2xl font-bold text-white">{match.homeTeam.name}</span>
+              <span className="text-2xl font-bold text-white">{match.homeTeam?.name ?? ka.match.tbd}</span>
               {match.status === "COMPLETED" ? (
                 <span className="text-3xl font-extrabold text-white tabular-nums">
                   {match.homeScore} – {match.awayScore}
@@ -159,7 +162,7 @@ export default async function MatchDetailPage({
               ) : (
                 <span className="text-xl font-semibold text-white/60">{ka.common.vs}</span>
               )}
-              <span className="text-2xl font-bold text-white">{match.awayTeam.name}</span>
+              <span className="text-2xl font-bold text-white">{match.awayTeam?.name ?? ka.match.tbd}</span>
             </div>
           </div>
           <Badge className={statusColor[match.status] || "bg-white/20 text-white"}>
@@ -191,14 +194,17 @@ export default async function MatchDetailPage({
         isAdmin={isAdmin}
       />
 
-      <MatchPitch
-        homeTeamName={match.homeTeam.name}
-        awayTeamName={match.awayTeam.name}
-        homePlayers={homeMembers}
-        awayPlayers={awayMembers}
-        maxPlayers={match.championship.maxPlayersPerTeam}
-      />
+      {hasTeams && (
+        <MatchPitch
+          homeTeamName={match.homeTeam!.name}
+          awayTeamName={match.awayTeam!.name}
+          homePlayers={homeMembers}
+          awayPlayers={awayMembers}
+          maxPlayers={match.championship.maxPlayersPerTeam}
+        />
+      )}
 
+      {hasTeams && (
       <Card>
         <CardHeader>
           <CardTitle>{ka.match.matchStaff}</CardTitle>
@@ -222,6 +228,7 @@ export default async function MatchDetailPage({
           />
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }

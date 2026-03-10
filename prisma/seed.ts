@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Cleaning database...");
 
+  await prisma.matchPlayerStat.deleteMany();
   await prisma.matchStaff.deleteMany();
   await prisma.match.deleteMany();
   await prisma.championshipSponsor.deleteMany();

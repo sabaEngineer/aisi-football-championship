@@ -169,4 +169,43 @@ export const playerService = {
       orderBy: { joinedAt: "asc" },
     });
   },
+
+  /**
+   * Captain or admin moves a member between ACTIVE and RESERVE.
+   * - Move to RESERVE: reserve count must be < max; cannot move captain (must assign new captain first)
+   * - Move to ACTIVE: active count must be < max
+   */
+  async updateMemberStatus(
+    memberId: number,
+    teamId: number,
+    newStatus: "ACTIVE" | "RESERVE"
+  ) {
+    const member = await prisma.teamMember.findFirst({
+      where: { id: memberId, teamId, status: { not: "LEFT" } },
+      include: { team: { include: { championship: true } } },
+    });
+    if (!member) throw new Error("Member not found");
+
+    const [activeCount, reserveCount] = await Promise.all([
+      prisma.teamMember.count({ where: { teamId, status: "ACTIVE" } }),
+      prisma.teamMember.count({ where: { teamId, status: "RESERVE" } }),
+    ]);
+    const maxActive = member.team.championship.maxPlayersPerTeam;
+    const maxReserve = member.team.championship.maxReservesPerTeam;
+
+    if (newStatus === "RESERVE") {
+      if (member.status === "RESERVE") throw new Error("Player is already a reserve");
+      if (member.role === "CAPTAIN") throw new Error("Cannot move captain to reserve. Assign a new captain first.");
+      if (reserveCount >= maxReserve) throw new Error(`Reserve list is full (max ${maxReserve})`);
+    } else {
+      if (member.status === "ACTIVE") throw new Error("Player is already active");
+      if (activeCount >= maxActive) throw new Error(`Active squad is full (max ${maxActive})`);
+    }
+
+    return prisma.teamMember.update({
+      where: { id: memberId },
+      data: { status: newStatus },
+      include: { user: true },
+    });
+  },
 };

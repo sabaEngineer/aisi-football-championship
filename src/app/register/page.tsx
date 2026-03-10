@@ -23,6 +23,7 @@ export default function RegisterPage() {
     const form = new FormData(e.currentTarget);
     const body = {
       fullName: form.get("fullName") as string,
+      email: (form.get("email") as string).trim().toLowerCase(),
       phone: form.get("phone") as string,
       password: form.get("password") as string,
       socialMediaLink: (form.get("socialMediaLink") as string) || undefined,
@@ -121,6 +122,16 @@ export default function RegisterPage() {
                 <Input
                   name="fullName"
                   placeholder={ka.auth.fullNamePlaceholder}
+                  required
+                  className="h-11"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">{ka.auth.email}</label>
+                <Input
+                  name="email"
+                  type="email"
+                  placeholder={ka.auth.emailPlaceholder}
                   required
                   className="h-11"
                 />

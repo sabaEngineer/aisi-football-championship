@@ -10,7 +10,11 @@ export async function POST(request: NextRequest) {
     const parsed = await parseBody(request, registerSchema);
     if (parsed.error) return parsed.error;
 
-    const { fullName, phone, password, socialMediaLink } = parsed.data;
+    const { fullName, email, phone, password, socialMediaLink } = parsed.data;
+
+    // Check if email already exists
+    const existingByEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingByEmail) return error("A user with this email already exists", 409);
 
     // Check if phone already exists (try normalized and legacy formats)
     const { getPhoneLookupVariants } = await import("@/lib/phone");
@@ -21,9 +25,6 @@ export async function POST(request: NextRequest) {
     if (existing) return error("A user with this phone number already exists", 409);
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generate a unique email from phone (since email is unique in schema)
-    const email = `${phone.replace(/[^0-9]/g, "")}@player.local`;
 
     const user = await prisma.user.create({
       data: {

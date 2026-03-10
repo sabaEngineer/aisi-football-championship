@@ -73,16 +73,27 @@ export default async function ChampionshipMatchesTab({
       !(m.homeTeam === null && m.awayTeam === null)
   );
 
-  const calendarMatches = matches.map((m) => ({
-    id: m.id,
-    date: m.date,
-    time: m.time,
-    homeTeam: m.homeTeam ? { id: m.homeTeam.id, name: m.homeTeam.name } : null,
-    awayTeam: m.awayTeam ? { id: m.awayTeam.id, name: m.awayTeam.name } : null,
-    status: m.status,
-  }));
+  function getRoundLabel(round: number, totalRounds: number): string {
+    const fromFinal = totalRounds - round;
+    if (fromFinal === 0) return ka.match.round.final;
+    if (fromFinal === 1) return ka.match.round.semiFinal;
+    if (fromFinal === 2) return ka.match.round.quarterFinal;
+    return ka.match.round.roundN.replace("{n}", String(round));
+  }
 
-  const hasAnyScheduledDate = calendarMatches.some((m) => m.date !== null);
+  const calendarMatches = matches
+    .filter((m) => m.date !== null)
+    .map((m) => ({
+      id: m.id,
+      date: m.date,
+      time: m.time,
+      homeTeam: m.homeTeam ? { id: m.homeTeam.id, name: m.homeTeam.name } : null,
+      awayTeam: m.awayTeam ? { id: m.awayTeam.id, name: m.awayTeam.name } : null,
+      status: m.status,
+      roundLabel: getRoundLabel(m.round ?? 1, totalRounds),
+    }));
+
+  const hasAnyScheduledDate = calendarMatches.length > 0;
 
   return (
     <div className="space-y-6">
@@ -97,7 +108,7 @@ export default async function ChampionshipMatchesTab({
           <CardTitle>{ka.match.tournamentBracket}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TournamentBracket matches={bracketMatches} totalRounds={totalRounds} />
+          <TournamentBracket matches={bracketMatches} totalRounds={totalRounds} isAdmin={isAdmin} />
         </CardContent>
       </Card>
 

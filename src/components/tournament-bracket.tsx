@@ -20,6 +20,7 @@ interface BracketMatch {
 interface Props {
   matches: BracketMatch[];
   totalRounds: number;
+  isAdmin?: boolean;
 }
 
 function getRoundLabel(round: number, totalRounds: number): string {
@@ -30,7 +31,7 @@ function getRoundLabel(round: number, totalRounds: number): string {
   return ka.match.round.roundN.replace("{n}", String(round));
 }
 
-export function TournamentBracket({ matches, totalRounds }: Props) {
+export function TournamentBracket({ matches, totalRounds, isAdmin }: Props) {
   const champion = (() => {
     const final = matches.find((m) => m.round === totalRounds);
     if (final?.winnerId) {
@@ -65,7 +66,7 @@ export function TournamentBracket({ matches, totalRounds }: Props) {
                 </div>
                 <div className="flex flex-col flex-1 justify-around gap-2 px-2">
                   {roundMatches.map((match) => (
-                    <MatchCard key={match.id} match={match} />
+                    <MatchCard key={match.id} match={match} isAdmin={isAdmin} />
                   ))}
                 </div>
               </div>
@@ -77,11 +78,12 @@ export function TournamentBracket({ matches, totalRounds }: Props) {
   );
 }
 
-function MatchCard({ match }: { match: BracketMatch }) {
+function MatchCard({ match, isAdmin }: { match: BracketMatch; isAdmin?: boolean }) {
   const isCompleted = match.status === "COMPLETED";
   const isBye =
     isCompleted && (match.homeTeam === null || match.awayTeam === null);
   const hasTeams = match.homeTeam !== null && match.awayTeam !== null;
+  const isTbdScheduled = !hasTeams && !isBye && match.status !== "COMPLETED";
 
   const card = (
     <div
@@ -89,7 +91,7 @@ function MatchCard({ match }: { match: BracketMatch }) {
         "w-52 rounded-lg border text-sm my-1 overflow-hidden transition-shadow",
         isCompleted ? "border-green-200 bg-green-50/30" : "border-border bg-card",
         isBye && "opacity-50",
-        hasTeams && !isBye && "hover:shadow-md hover:border-green-300 cursor-pointer"
+        (hasTeams && !isBye || (isTbdScheduled && isAdmin)) && "hover:shadow-md hover:border-green-300 cursor-pointer"
       )}
     >
       <TeamSlot
@@ -110,7 +112,7 @@ function MatchCard({ match }: { match: BracketMatch }) {
     </div>
   );
 
-  if (hasTeams && !isBye) {
+  if ((hasTeams && !isBye) || (isTbdScheduled && isAdmin)) {
     return <Link href={`/matches/${match.id}`}>{card}</Link>;
   }
   return card;
