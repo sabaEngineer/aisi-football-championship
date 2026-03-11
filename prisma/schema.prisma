@@ -247,6 +247,14 @@ model NominationWinner {
   team       Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
 
+// ─── AppSetting (key-value for global app config) ──────────────────────────────
+
+model AppSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String // stored as string; parse as number for charity_collected_amount
+}
+
 // ─── ChampionshipSponsor (many-to-many) ──────────────────────────────────────
 
 model ChampionshipSponsor {

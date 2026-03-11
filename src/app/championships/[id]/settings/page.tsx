@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { ChampionshipSettings } from "../championship-settings";
+import { CharityAmountEditor } from "../charity-amount-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function ChampionshipSettingsTab({
 
   return (
     <div className="space-y-6">
+      <CharityAmountEditor />
       <ChampionshipSettings
         championshipId={championship.id}
         championshipName={championship.name}

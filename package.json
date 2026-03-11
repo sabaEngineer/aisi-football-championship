@@ -14,7 +14,8 @@
     "db:seed-add-players": "npx tsx prisma/seed-add-players.ts",
     "db:reset": "prisma db push --force-reset && npm run db:seed",
     "db:studio": "prisma studio",
-    "db:migrate-payment-modal": "prisma db execute --file prisma/add-payment-modal-column.sql --schema prisma/schema.prisma"
+    "db:migrate-payment-modal": "prisma db execute --file prisma/add-payment-modal-column.sql --schema prisma/schema.prisma",
+    "db:migrate-app-setting": "prisma db execute --file prisma/add-app-setting.sql --schema prisma/schema.prisma"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

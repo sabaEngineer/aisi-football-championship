@@ -189,6 +189,10 @@ export const ka = {
     deleteChampionship: "ჩემპიონატის წაშლა",
     confirmDeleteChampionship: "ნამდვილად წავშალოთ ჩემპიონატი? ყველა გუნდი, მატჩი და მონაცემი წაიშლება.",
     championshipDeleted: "ჩემპიონატი წაიშალა",
+    charityCollectedTitle: "შეგროვებული თანხა",
+    charityCollectedDesc: "საქველმოქმედო მიზნებისთვის შეგროვებული თანხით ვგეგმავთ ბავშვთა სახლის ბენეფიციარების დახმარებას. ეს თანხა ნაჩვენებია გადახდის ინფორმაციის მოდალში.",
+    charityCollectedLabel: "შეგროვებული თანხა (ლარი)",
+    charityCollectedShown: "ეს თანხა ნაჩვენებია მოთამაშეებს გადახდის ინფორმაციის მოდალში.",
   },
 
   team: {

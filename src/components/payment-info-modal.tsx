@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,9 +39,20 @@ export function PaymentInfoModal({
   const [internalOpen, setInternalOpen] = useState(false);
   const [copiedTbc, setCopiedTbc] = useState(false);
   const [copiedBog, setCopiedBog] = useState(false);
+  const [collectedAmount, setCollectedAmount] = useState<number | null>(null);
 
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
+
+  useEffect(() => {
+    if (open) {
+      fetch("/api/settings/charity-collected")
+        .then((r) => r.json())
+        .then((d) => d.success && setCollectedAmount(d.data.amount))
+        .catch(() => {});
+    }
+  }, [open]);
+
   const setOpen = isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen;
 
   async function copyToClipboard(text: string, setCopied: (v: boolean) => void) {
@@ -87,6 +98,12 @@ export function PaymentInfoModal({
             <p>
               ამიტომ 10 ლარი მხოლოდ სიმბოლური თანხაა — ვისაც რამდენის შესაძლებლობა აქვს, შეუძლია საკუთარი სურვილით ჩარიცხოს და მონაწილეობა მიიღოს ამ კეთილ საქმეში.
             </p>
+            {collectedAmount !== null && (
+              <p className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3 font-medium">
+                ამდრომდე შეგროვებული თანხა: <strong>{collectedAmount} ლარი</strong>
+              </p>
+            )}
+           
 
             <div className="pt-4 border-t space-y-3">
               <p className="font-medium">საბანკო ანგარიშები:</p>
