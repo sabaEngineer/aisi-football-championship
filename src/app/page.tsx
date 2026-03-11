@@ -198,12 +198,17 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="mt-12 border-t">
-        <div className="mx-auto max-w-7xl px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-green-600" />
-            <span className="font-medium text-foreground">{ka.common.appFullName}</span>
+        <div className="mx-auto max-w-7xl px-4 py-10 flex flex-col gap-3 text-sm text-muted-foreground">
+          <p className="text-center">
+            დამატებითი კითხვების შემთხვევაში დაგვიკავშირდით ნომერზე 568263181 ან 579203363
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-green-600" />
+              <span className="font-medium text-foreground">{ka.common.appFullName}</span>
+            </div>
+            <p>&copy; {new Date().getFullYear()} {ka.common.allRightsReserved}</p>
           </div>
-          <p>&copy; {new Date().getFullYear()} {ka.common.allRightsReserved}</p>
         </div>
       </footer>
     </div>

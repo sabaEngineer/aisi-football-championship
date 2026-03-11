@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { UserPlus, LogIn } from "lucide-react";
 import { ka, getPositionLabel } from "@/lib/ka";
+import { STORAGE_KEY, PAYMENT_MODAL_PENDING_EVENT } from "@/components/payment-modal-trigger";
 
 interface UnassignedPlayer {
   id: number;
@@ -69,6 +70,17 @@ export function AddReserveButton({
     if (!data.success) {
       setError(data.error);
       return;
+    }
+
+    // Store for payment modal (30s delay) — only when current user joins
+    if (data.data?.id && data.data?.team?.name) {
+      try {
+        sessionStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ memberId: data.data.id, teamName: data.data.team.name, teamId })
+        );
+        window.dispatchEvent(new Event(PAYMENT_MODAL_PENDING_EVENT));
+      } catch (_) {}
     }
 
     setOpen(false);

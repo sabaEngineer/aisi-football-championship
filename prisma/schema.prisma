@@ -126,16 +126,17 @@ model Team {
 // ─── TeamMember (connects User to Team) ──────────────────────────────────────
 
 model TeamMember {
-  id        Int              @id @default(autoincrement())
-  userId    Int
-  teamId    Int
-  role      TeamMemberRole   @default(PLAYER)
-  position  String?
-  positionX Float?
-  positionY Float?
-  status    TeamMemberStatus @default(ACTIVE)
-  joinedAt  DateTime         @default(now())
-  leftAt    DateTime?
+  id                   Int              @id @default(autoincrement())
+  userId               Int
+  teamId               Int
+  role                 TeamMemberRole   @default(PLAYER)
+  position             String?
+  positionX            Float?
+  positionY            Float?
+  status               TeamMemberStatus @default(ACTIVE)
+  joinedAt             DateTime         @default(now())
+  leftAt               DateTime?
+  paymentModalShownAt  DateTime?        // when we showed the payment info modal (null = not shown yet)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)

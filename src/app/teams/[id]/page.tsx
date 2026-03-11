@@ -15,6 +15,7 @@ import { EditTeamName } from "./edit-team-name";
 import { PositionSelect } from "@/components/position-select";
 import { Crown } from "lucide-react";
 import { ka } from "@/lib/ka";
+import { PaymentModalTrigger } from "@/components/payment-modal-trigger";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +85,7 @@ export default async function TeamDetailPage({
 
   return (
     <div className="space-y-8">
-      
+      <PaymentModalTrigger />
       <div className="flex items-center justify-between">
         <div>
           <Link

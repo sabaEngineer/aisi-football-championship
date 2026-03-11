@@ -10,6 +10,7 @@ import {
 import { Plus } from "lucide-react";
 import { ka } from "@/lib/ka";
 import { AllTeamsFullModal } from "@/components/all-teams-full-modal";
+import { PaymentInfoModal } from "@/components/payment-info-modal";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function ChampionshipTeamsTab({
           status: { not: "LEFT" },
           team: { championshipId: championship.id },
         },
+        include: { team: true },
       })
     : null;
 
@@ -79,6 +81,11 @@ export default async function ChampionshipTeamsTab({
   return (
     <>
       {showAllTeamsFullModal && <AllTeamsFullModal open={true} />}
+      {currentUserHasTeamInChampionship?.team && (
+        <div className="flex justify-start mb-4">
+          <PaymentInfoModal teamName={currentUserHasTeamInChampionship.team.name} />
+        </div>
+      )}
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
