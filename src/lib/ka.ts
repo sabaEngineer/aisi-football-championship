@@ -343,6 +343,7 @@ export const ka = {
     matchesPlayed: "მატჩი",
     goals: "გოლი",
     assists: "პასი",
+    saves: "ბურთის მოგერიება",
     history: "ისტორია",
     shareProfile: "ბმულის კოპირება",
     linkCopied: "კოპირებულია!",

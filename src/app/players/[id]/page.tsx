@@ -54,13 +54,14 @@ export default async function PlayerProfilePage({
       })
     : 0;
 
-  // Goals and assists from MatchPlayerStat
+  // Goals, assists, saves from MatchPlayerStat
   const stats = await prisma.matchPlayerStat.aggregate({
     where: { userId: id },
-    _sum: { goals: true, assists: true },
+    _sum: { goals: true, assists: true, saves: true },
   });
   const goals = stats._sum.goals ?? 0;
   const assists = stats._sum.assists ?? 0;
+  const saves = stats._sum.saves ?? 0;
 
   // History: team memberships with team + championship
   const history = await prisma.teamMember.findMany({
@@ -106,7 +107,7 @@ export default async function PlayerProfilePage({
           <CardTitle>{ka.player.statistics}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-4 rounded-lg bg-muted/50">
               <p className="text-3xl font-bold tabular-nums">{matchesPlayed}</p>
               <p className="text-sm text-muted-foreground mt-1">{ka.player.matchesPlayed}</p>
@@ -118,6 +119,10 @@ export default async function PlayerProfilePage({
             <div className="text-center p-4 rounded-lg bg-muted/50">
               <p className="text-3xl font-bold tabular-nums">{assists}</p>
               <p className="text-sm text-muted-foreground mt-1">{ka.player.assists}</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-muted/50">
+              <p className="text-3xl font-bold tabular-nums">{saves}</p>
+              <p className="text-sm text-muted-foreground mt-1">{ka.player.saves}</p>
             </div>
           </div>
         </CardContent>

@@ -182,6 +182,7 @@ model MatchPlayerStat {
   teamId  Int
   goals   Int @default(0)
   assists Int @default(0)
+  saves   Int @default(0) // goalkeeper saves (ბურთის მოგერიება)
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
