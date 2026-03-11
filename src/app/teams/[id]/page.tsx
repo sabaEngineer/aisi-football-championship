@@ -11,6 +11,7 @@ import { FootballPitch, type PitchPlayer } from "@/components/football-pitch";
 import { AddReserveButton } from "./add-reserve-button";
 import { LeaveTeamButton } from "./leave-team-button";
 import { MoveStatusButton } from "./move-status-button";
+import { TransferCaptainButton } from "./transfer-captain-button";
 import { EditTeamName } from "./edit-team-name";
 import { PositionSelect } from "@/components/position-select";
 import { Crown } from "lucide-react";
@@ -210,7 +211,16 @@ export default async function TeamDetailPage({
                           {ka.team.captain}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground">{ka.team.player}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">{ka.team.player}</span>
+                          {(isAdmin || isCaptain) && (
+                            <TransferCaptainButton
+                              memberId={m.id}
+                              teamId={team.id}
+                              playerName={m.user.fullName}
+                            />
+                          )}
+                        </div>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">

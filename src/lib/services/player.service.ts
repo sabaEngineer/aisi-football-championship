@@ -136,6 +136,35 @@ export const playerService = {
   },
 
   /**
+   * Transfer captaincy to another active member.
+   * Called by current captain or admin. New captain must be ACTIVE.
+   */
+  async transferCaptaincy(teamId: number, newCaptainMemberId: number) {
+    const newCaptain = await prisma.teamMember.findFirst({
+      where: { id: newCaptainMemberId, teamId, status: "ACTIVE" },
+      include: { user: true },
+    });
+    if (!newCaptain) throw new Error("Member not found or not active");
+    if (newCaptain.role === "CAPTAIN") throw new Error("Player is already captain");
+
+    await prisma.$transaction([
+      prisma.teamMember.updateMany({
+        where: { teamId, role: "CAPTAIN", status: "ACTIVE" },
+        data: { role: "PLAYER" },
+      }),
+      prisma.teamMember.update({
+        where: { id: newCaptainMemberId },
+        data: { role: "CAPTAIN" },
+      }),
+    ]);
+
+    return prisma.teamMember.findUnique({
+      where: { id: newCaptainMemberId },
+      include: { user: true },
+    });
+  },
+
+  /**
    * Assign captaincy to the longest-serving active member.
    * If no active members exist, no captain is assigned.
    */

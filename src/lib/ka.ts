@@ -228,6 +228,8 @@ export const ka = {
     allTeamsFullMessage: "ამჟამად ყველა გუნდი სავსეა. თქვენ სათადარიგო სიაში ხართ. ადმინისტრატორი შეეცდება ადგილი მოგიძლიოთ და მალე დაგიკავშირდებათ.",
     removeConfirm: "წავშალოთ {name} გუნდიდან?",
     teamsCount: "გუნდები ({n} / {max})",
+    makeCaptain: "კაპიტანად დანიშვნა",
+    transferCaptainConfirm: "გადავაწვდოთ კაპიტანობა {name}-ს?",
   },
 
   match: {
