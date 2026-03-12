@@ -20,14 +20,13 @@ const statusColor: Record<string, string> = {
 export default async function ChampionshipsPage() {
   const [championships, session, stats] = await Promise.all([
     prisma.championship.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        status: true,
-        maxTeams: true,
-        maxPlayersPerTeam: true,
-        _count: { select: { teams: true, matches: true, sponsors: true } },
+      include: {
+        teams: {
+          include: {
+            members: { where: { status: "ACTIVE" }, select: { id: true } },
+          },
+        },
+        _count: { select: { matches: true, sponsors: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -108,14 +107,26 @@ export default async function ChampionshipsPage() {
                 <CardContent>
                   <div className="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
                     <div>
-                      <span className="font-medium text-foreground">{c._count.teams}</span>
-                      {" / "}{c.maxTeams} {ka.championship.teams}
+                      {(() => {
+                        const teamCount = c.teams.length;
+                        const fullTeamsCount = c.teams.filter(
+                          (t) => t.members.length >= c.maxPlayersPerTeam
+                        ).length;
+                        const showFull = teamCount >= c.maxTeams;
+                        const displayCount = showFull ? fullTeamsCount : teamCount;
+                        return (
+                          <>
+                            <span className="font-medium text-foreground">{displayCount}</span>
+                            {" / "}{c.maxTeams} {ka.championship.teams}
+                          </>
+                        );
+                      })()}
                     </div>
                     <div>
-                      <span className="font-medium text-foreground">{c._count.matches}</span> {ka.championship.matches}
+                      <span className="font-medium text-foreground">{c._count?.matches ?? 0}</span> {ka.championship.matches}
                     </div>
                     <div>
-                      <span className="font-medium text-foreground">{c._count.sponsors}</span> {ka.championship.sponsors}
+                      <span className="font-medium text-foreground">{c._count?.sponsors ?? 0}</span> {ka.championship.sponsors}
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
