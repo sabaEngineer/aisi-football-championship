@@ -129,9 +129,6 @@ export default async function ChampionshipsPage() {
                       <span className="font-medium text-foreground">{c._count?.sponsors ?? 0}</span> {ka.championship.sponsors}
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    {`მაქს. ${c.maxPlayersPerTeam} მოთამაშე გუნდში`}
-                  </p>
                   {c.description && (
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
                   )}
