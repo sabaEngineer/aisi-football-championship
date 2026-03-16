@@ -42,15 +42,17 @@ export default async function ChampionshipsPage() {
 
   const isAdmin = session?.role === "ADMIN";
 
-  // For logged-in users: which championships they're in (via team membership)
-  const registeredChampionshipIds = session
-    ? new Set(
-        (await prisma.teamMember.findMany({
-          where: { userId: session.userId, status: { not: "LEFT" } },
-          include: { team: { select: { championshipId: true } } },
-        })).map((m) => m.team.championshipId)
+  // For logged-in users: championship -> their team (id, name)
+  const userTeamByChampionship = session
+    ? new Map(
+        (
+          await prisma.teamMember.findMany({
+            where: { userId: session.userId, status: { not: "LEFT" } },
+            include: { team: { select: { id: true, name: true, championshipId: true } } },
+          })
+        ).map((m) => [m.team.championshipId, { id: m.team.id, name: m.team.name }])
       )
-    : new Set<number>();
+    : new Map<number, { id: number; name: string }>();
 
   return (
     <div className="space-y-6">
@@ -94,8 +96,8 @@ export default async function ChampionshipsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {championships.map((c) => (
-            <Link key={c.id} href={`/championships/${c.id}`}>
-              <Card className="hover:bg-muted/50 transition-colors h-full border-l-4 border-l-green-600">
+            <Card key={c.id} className="hover:bg-muted/50 transition-colors h-full border-l-4 border-l-green-600">
+              <Link href={`/championships/${c.id}`} className="block">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{c.name}</CardTitle>
@@ -132,14 +134,22 @@ export default async function ChampionshipsPage() {
                   {c.description && (
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
                   )}
-                  {session && registeredChampionshipIds.has(c.id) && (
-                    <p className="text-xs mt-2 font-semibold text-green-600">
-                      {ka.championship.yourChampionship}
-                    </p>
-                  )}
                 </CardContent>
-              </Card>
-            </Link>
+              </Link>
+              {session && userTeamByChampionship.has(c.id) && (
+                <div className="px-6 pb-4 -mt-2">
+                  <p className="text-xs font-semibold text-green-600">
+                    {ka.championship.yourTeam}{" "}
+                    <Link
+                      href={`/teams/${userTeamByChampionship.get(c.id)!.id}`}
+                      className="underline hover:no-underline"
+                    >
+                      {userTeamByChampionship.get(c.id)!.name}
+                    </Link>
+                  </p>
+                </div>
+              )}
+            </Card>
           ))}
         </div>
       )}

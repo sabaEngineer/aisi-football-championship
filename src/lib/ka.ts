@@ -127,6 +127,7 @@ export const ka = {
       CANCELLED: "გაუქმებული",
     },
     yourChampionship: "შენი ჩემპიონატი",
+    yourTeam: "შენ ხარ გუნდში:",
   },
 
   tabs: {
