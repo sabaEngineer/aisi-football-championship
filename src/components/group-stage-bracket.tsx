@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Clock, Eye } from "lucide-react";
 import { ka } from "@/lib/ka";
 
 export interface GroupStageMatch {
@@ -14,6 +15,8 @@ export interface GroupStageMatch {
   awayScore: number;
   winnerId: number | null;
   status: string;
+  date?: string | null;
+  time?: string | null;
 }
 
 interface Props {
@@ -49,9 +52,18 @@ export function GroupStageBracket({ matches }: Props) {
   );
 }
 
+function formatMatchDate(date?: string | null, time?: string | null) {
+  if (!date && !time) return null;
+  if (!date && time) return time;
+  const d = new Date(date);
+  const day = d.toLocaleDateString("ka-GE", { day: "numeric", month: "short" });
+  return time ? `${day}, ${time}` : day;
+}
+
 function GroupMatchCard({ match }: { match: GroupStageMatch }) {
   const isCompleted = match.status === "COMPLETED";
   const hasTeams = match.homeTeam !== null && match.awayTeam !== null;
+  const dateLabel = formatMatchDate(match.date, match.time);
 
   const card = (
     <div
@@ -61,6 +73,12 @@ function GroupMatchCard({ match }: { match: GroupStageMatch }) {
         hasTeams && "hover:shadow-md hover:border-green-300 cursor-pointer"
       )}
     >
+      {dateLabel && (
+        <div className="flex items-center gap-1 px-3 py-1 bg-muted/50 text-[10px] text-muted-foreground">
+          <Clock className="h-3 w-3" />
+          {dateLabel}
+        </div>
+      )}
       <div className="flex items-center justify-between px-3 py-2 gap-2">
         <span
           className={cn(
@@ -90,6 +108,12 @@ function GroupMatchCard({ match }: { match: GroupStageMatch }) {
       </div>
       {isCompleted && match.homeScore === match.awayScore && hasTeams && (
         <p className="text-[10px] text-center text-muted-foreground px-2 pb-1">{ka.match.draw}</p>
+      )}
+      {hasTeams && (
+        <div className="flex items-center justify-center gap-1 px-3 py-1.5 border-t text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+          <Eye className="h-3 w-3" />
+          {ka.match.viewMatch}
+        </div>
       )}
     </div>
   );

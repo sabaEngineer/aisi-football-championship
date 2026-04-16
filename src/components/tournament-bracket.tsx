@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Trophy } from "lucide-react";
+import { Trophy, Clock, Eye } from "lucide-react";
 import { ka } from "@/lib/ka";
 
 interface BracketMatch {
@@ -15,6 +15,8 @@ interface BracketMatch {
   awayScore: number;
   winnerId: number | null;
   status: string;
+  date?: string | null;
+  time?: string | null;
 }
 
 interface Props {
@@ -78,12 +80,21 @@ export function TournamentBracket({ matches, totalRounds, isAdmin }: Props) {
   );
 }
 
+function formatMatchDate(date?: string | null, time?: string | null) {
+  if (!date && !time) return null;
+  if (!date && time) return time;
+  const d = new Date(date);
+  const day = d.toLocaleDateString("ka-GE", { day: "numeric", month: "short" });
+  return time ? `${day}, ${time}` : day;
+}
+
 function MatchCard({ match, isAdmin }: { match: BracketMatch; isAdmin?: boolean }) {
   const isCompleted = match.status === "COMPLETED";
   const isBye =
     isCompleted && (match.homeTeam === null || match.awayTeam === null);
   const hasTeams = match.homeTeam !== null && match.awayTeam !== null;
   const isTbdScheduled = !hasTeams && !isBye && match.status !== "COMPLETED";
+  const dateLabel = formatMatchDate(match.date, match.time);
 
   const card = (
     <div
@@ -94,6 +105,12 @@ function MatchCard({ match, isAdmin }: { match: BracketMatch; isAdmin?: boolean 
         (hasTeams && !isBye || (isTbdScheduled && isAdmin)) && "hover:shadow-md hover:border-green-300 cursor-pointer"
       )}
     >
+      {dateLabel && (
+        <div className="flex items-center gap-1 px-3 py-1 bg-muted/50 text-[10px] text-muted-foreground">
+          <Clock className="h-3 w-3" />
+          {dateLabel}
+        </div>
+      )}
       <TeamSlot
         team={match.homeTeam}
         score={match.homeScore}
@@ -109,6 +126,12 @@ function MatchCard({ match, isAdmin }: { match: BracketMatch; isAdmin?: boolean 
         isCompleted={isCompleted}
         isBye={isBye && match.awayTeam === null}
       />
+      {(hasTeams && !isBye || (isTbdScheduled && isAdmin)) && (
+        <div className="flex items-center justify-center gap-1 px-3 py-1.5 border-t text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+          <Eye className="h-3 w-3" />
+          {ka.match.viewMatch}
+        </div>
+      )}
     </div>
   );
 

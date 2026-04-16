@@ -75,6 +75,8 @@ export default async function ChampionshipMatchesTab({
     awayScore: m.awayScore,
     winnerId: m.winnerId,
     status: m.status,
+    date: m.date?.toISOString() ?? null,
+    time: m.time,
   }));
 
   const allBracketMatches = matches.map((m) => ({
@@ -87,6 +89,8 @@ export default async function ChampionshipMatchesTab({
     awayScore: m.awayScore,
     winnerId: m.winnerId,
     status: m.status,
+    date: m.date?.toISOString() ?? null,
+    time: m.time,
   }));
 
   const playableMatches = matches.filter(
@@ -108,6 +112,8 @@ export default async function ChampionshipMatchesTab({
           awayScore: m.awayScore,
           winnerId: m.winnerId,
           status: m.status,
+          date: m.date?.toISOString() ?? null,
+          time: m.time,
         }))
     : [];
 

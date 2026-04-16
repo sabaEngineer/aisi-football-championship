@@ -224,7 +224,6 @@ export const matchService = {
       seeds[i] = groupWinners[i].teamId;
     }
 
-    let position = 1;
     let totalCreated = 0;
 
     for (let round = 1; round <= totalRounds; round++) {
@@ -244,7 +243,7 @@ export const matchService = {
           data: {
             championshipId,
             round,
-            bracketPosition: position++,
+            bracketPosition: i + 1,
             groupNumber: null,
             homeTeamId,
             awayTeamId,
@@ -333,7 +332,7 @@ export const matchService = {
     });
 
     const allMatches = await prisma.match.findMany({
-      where: { championshipId: match.championshipId },
+      where: { championshipId: match.championshipId, groupNumber: null },
       select: { id: true, round: true, bracketPosition: true },
     });
 
