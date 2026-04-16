@@ -141,23 +141,15 @@ export const matchService = {
   },
 
   /**
-   * After group stage is complete, generate a single-elimination knockout bracket
-   * from the top team of each group (by points → goal diff → goals scored).
-   * If group winners are not a power of 2, higher-seeded teams get BYEs.
+   * Single-elimination finals (groupNumber null, rounds 1..N):
+   * - If group stage exists: all group matches must be completed; seeds = each group's winner.
+   * - If no group stage and 2–4 teams with players: seeds = those teams (random order); BYEs if needed.
+   * - More than 4 teams with players and no groups: not allowed (use group fixtures first).
    */
   async generateKnockout(championshipId: number) {
     const groupMatches = await prisma.match.findMany({
       where: { championshipId, groupNumber: { not: null } },
     });
-    if (groupMatches.length === 0) {
-      throw new Error("No group stage matches found");
-    }
-    const incomplete = groupMatches.filter((m) => m.status !== "COMPLETED");
-    if (incomplete.length > 0) {
-      throw new Error(
-        `${incomplete.length} group match(es) not completed yet`
-      );
-    }
 
     const existingKnockout = await prisma.match.findFirst({
       where: { championshipId, groupNumber: null },
@@ -168,61 +160,96 @@ export const matchService = {
       });
     }
 
-    type Standing = {
-      teamId: number;
-      group: number;
-      points: number;
-      goalDiff: number;
-      goalsFor: number;
-    };
-    const map = new Map<number, Standing>();
+    let seeds: (number | null)[];
 
-    for (const m of groupMatches) {
-      if (!m.homeTeamId || !m.awayTeamId) continue;
-      for (const tid of [m.homeTeamId, m.awayTeamId]) {
-        if (!map.has(tid)) {
-          map.set(tid, { teamId: tid, group: m.groupNumber!, points: 0, goalDiff: 0, goalsFor: 0 });
+    if (groupMatches.length > 0) {
+      const incomplete = groupMatches.filter((m) => m.status !== "COMPLETED");
+      if (incomplete.length > 0) {
+        throw new Error(
+          `${incomplete.length} group match(es) not completed yet`
+        );
+      }
+
+      type Standing = {
+        teamId: number;
+        group: number;
+        points: number;
+        goalDiff: number;
+        goalsFor: number;
+      };
+      const map = new Map<number, Standing>();
+
+      for (const m of groupMatches) {
+        if (!m.homeTeamId || !m.awayTeamId) continue;
+        for (const tid of [m.homeTeamId, m.awayTeamId]) {
+          if (!map.has(tid)) {
+            map.set(tid, { teamId: tid, group: m.groupNumber!, points: 0, goalDiff: 0, goalsFor: 0 });
+          }
+        }
+        const home = map.get(m.homeTeamId)!;
+        const away = map.get(m.awayTeamId)!;
+        home.goalsFor += m.homeScore;
+        home.goalDiff += m.homeScore - m.awayScore;
+        away.goalsFor += m.awayScore;
+        away.goalDiff += m.awayScore - m.homeScore;
+        if (m.homeScore > m.awayScore) {
+          home.points += 3;
+        } else if (m.homeScore < m.awayScore) {
+          away.points += 3;
+        } else {
+          home.points += 1;
+          away.points += 1;
         }
       }
-      const home = map.get(m.homeTeamId)!;
-      const away = map.get(m.awayTeamId)!;
-      home.goalsFor += m.homeScore;
-      home.goalDiff += m.homeScore - m.awayScore;
-      away.goalsFor += m.awayScore;
-      away.goalDiff += m.awayScore - m.homeScore;
-      if (m.homeScore > m.awayScore) {
-        home.points += 3;
-      } else if (m.homeScore < m.awayScore) {
-        away.points += 3;
-      } else {
-        home.points += 1;
-        away.points += 1;
+
+      const groups = new Map<number, Standing[]>();
+      for (const s of map.values()) {
+        if (!groups.has(s.group)) groups.set(s.group, []);
+        groups.get(s.group)!.push(s);
+      }
+      for (const arr of groups.values()) {
+        arr.sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
+      }
+
+      const groupWinners = [...groups.keys()]
+        .sort((a, b) => a - b)
+        .map((g) => groups.get(g)![0]);
+
+      const n = groupWinners.length;
+      if (n < 2) throw new Error("Need at least 2 group winners for knockout");
+
+      const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
+      seeds = Array(bracketSize).fill(null);
+      for (let i = 0; i < n; i++) {
+        seeds[i] = groupWinners[i].teamId;
+      }
+    } else {
+      const teams = await prisma.team.findMany({
+        where: {
+          championshipId,
+          members: { some: { status: { not: "LEFT" } } },
+        },
+        select: { id: true },
+      });
+      if (teams.length < 2) {
+        throw new Error("Need at least 2 teams with players to generate finals");
+      }
+      if (teams.length > 4) {
+        throw new Error(
+          "With more than 4 teams with players, generate group fixtures first"
+        );
+      }
+      const shuffled = [...teams].sort(() => Math.random() - 0.5);
+      const n = shuffled.length;
+      const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
+      seeds = Array(bracketSize).fill(null);
+      for (let i = 0; i < n; i++) {
+        seeds[i] = shuffled[i].id;
       }
     }
 
-    const groups = new Map<number, Standing[]>();
-    for (const s of map.values()) {
-      if (!groups.has(s.group)) groups.set(s.group, []);
-      groups.get(s.group)!.push(s);
-    }
-    for (const arr of groups.values()) {
-      arr.sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
-    }
-
-    const groupWinners = [...groups.keys()]
-      .sort((a, b) => a - b)
-      .map((g) => groups.get(g)![0]);
-
-    const n = groupWinners.length;
-    if (n < 2) throw new Error("Need at least 2 group winners for knockout");
-
-    const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
+    const bracketSize = seeds.length;
     const totalRounds = Math.ceil(Math.log2(bracketSize));
-
-    const seeds: (number | null)[] = Array(bracketSize).fill(null);
-    for (let i = 0; i < n; i++) {
-      seeds[i] = groupWinners[i].teamId;
-    }
 
     let totalCreated = 0;
 

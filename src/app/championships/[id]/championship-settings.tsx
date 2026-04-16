@@ -37,6 +37,12 @@ export function ChampionshipSettings({
   groupsComplete,
   hasKnockout,
 }: Props) {
+  const canDirectFinals =
+    !hasGroupStage && teamCount >= 2 && teamCount <= 4;
+  const showFinalsCard = hasGroupStage || canDirectFinals;
+  const canGenerateFinals =
+    (hasGroupStage && groupsComplete) || canDirectFinals;
+
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -328,7 +334,7 @@ export function ChampionshipSettings({
       </CardContent>
     </Card>
 
-    {hasGroupStage && (
+    {showFinalsCard && (
       <Card className="border-yellow-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -338,9 +344,9 @@ export function ChampionshipSettings({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {ka.settings.knockoutDesc}
+            {hasGroupStage ? ka.settings.knockoutDesc : ka.settings.knockoutDescDirect}
           </p>
-          {!groupsComplete && (
+          {hasGroupStage && !groupsComplete && (
             <p className="text-sm text-amber-600 font-medium">
               {ka.settings.groupsNotComplete}
             </p>
@@ -348,7 +354,7 @@ export function ChampionshipSettings({
           <Button
             variant="default"
             className="bg-yellow-600 hover:bg-yellow-700"
-            disabled={!groupsComplete || generatingKnockout}
+            disabled={!canGenerateFinals || generatingKnockout}
             onClick={async () => {
               if (hasKnockout && !confirm(ka.settings.confirmRedraw)) return;
               setGeneratingKnockout(true);
