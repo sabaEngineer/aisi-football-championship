@@ -54,7 +54,7 @@ export function GroupStageBracket({ matches }: Props) {
 
 function formatMatchDate(date?: string | null, time?: string | null) {
   if (!date && !time) return null;
-  if (!date && time) return time;
+  if (!date) return time ?? null;
   const d = new Date(date);
   const day = d.toLocaleDateString("ka-GE", { day: "numeric", month: "short" });
   return time ? `${day}, ${time}` : day;
