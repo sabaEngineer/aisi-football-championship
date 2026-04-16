@@ -23,7 +23,10 @@ export default async function ChampionshipsPage() {
       include: {
         teams: {
           include: {
-            members: { where: { status: "ACTIVE" }, select: { id: true } },
+            members: {
+              where: { status: { not: "LEFT" } },
+              select: { id: true, status: true },
+            },
           },
         },
         _count: { select: { matches: true, sponsors: true } },
@@ -110,12 +113,15 @@ export default async function ChampionshipsPage() {
                   <div className="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
                     <div>
                       {(() => {
-                        const teamCount = c.teams.length;
+                        const registeredSlots = c.teams.length;
+                        const teamsWithPlayers = c.teams.filter((t) => t.members.length > 0).length;
+                        const activeRosterCount = (t: (typeof c.teams)[0]) =>
+                          t.members.filter((m) => m.status === "ACTIVE").length;
                         const fullTeamsCount = c.teams.filter(
-                          (t) => t.members.length >= c.maxPlayersPerTeam
+                          (t) => activeRosterCount(t) >= c.maxPlayersPerTeam
                         ).length;
-                        const showFull = teamCount >= c.maxTeams;
-                        const displayCount = showFull ? fullTeamsCount : teamCount;
+                        const showFull = registeredSlots >= c.maxTeams;
+                        const displayCount = showFull ? fullTeamsCount : teamsWithPlayers;
                         return (
                           <>
                             <span className="font-medium text-foreground">{displayCount}</span>

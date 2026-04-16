@@ -15,7 +15,7 @@ export default async function ChampionshipSettingsTab({
   const id = Number(rawId);
   if (isNaN(id)) notFound();
 
-  const [championship, session] = await Promise.all([
+  const [championship, session, teamsWithPlayersCount, groupMatches, knockoutMatches] = await Promise.all([
     prisma.championship.findUnique({
       where: { id },
       include: {
@@ -23,6 +23,20 @@ export default async function ChampionshipSettingsTab({
       },
     }),
     getSession(),
+    prisma.team.count({
+      where: {
+        championshipId: id,
+        members: { some: { status: { not: "LEFT" } } },
+      },
+    }),
+    prisma.match.findMany({
+      where: { championshipId: id, groupNumber: { not: null } },
+      select: { status: true },
+    }),
+    prisma.match.findFirst({
+      where: { championshipId: id, groupNumber: null },
+      select: { id: true },
+    }),
   ]);
 
   if (!championship) notFound();
@@ -39,8 +53,11 @@ export default async function ChampionshipSettingsTab({
         currentMaxPlayersPerTeam={championship.maxPlayersPerTeam}
         currentMaxReservesPerTeam={championship.maxReservesPerTeam}
         currentStatus={championship.status}
-        teamCount={championship._count.teams}
+        teamCount={teamsWithPlayersCount}
         hasMatches={championship._count.matches > 0}
+        hasGroupStage={groupMatches.length > 0}
+        groupsComplete={groupMatches.length > 0 && groupMatches.every((m) => m.status === "COMPLETED")}
+        hasKnockout={knockoutMatches !== null}
       />
     </div>
   );

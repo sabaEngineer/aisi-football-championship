@@ -15,6 +15,8 @@ interface MatchEntry {
   homeScore: number;
   awayScore: number;
   status: string;
+  /** Group stage — draws allowed */
+  groupNumber?: number | null;
 }
 
 function getRoundLabel(round: number, totalRounds: number): string {
@@ -36,8 +38,13 @@ export function MatchScoreEntry({
   const [saving, setSaving] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  async function handleSave(matchId: number, homeScore: number, awayScore: number) {
-    if (homeScore === awayScore) {
+  async function handleSave(
+    matchId: number,
+    homeScore: number,
+    awayScore: number,
+    allowDraw: boolean
+  ) {
+    if (homeScore === awayScore && !allowDraw) {
       setError(ka.match.noDrawAllowed);
       return;
     }
@@ -90,15 +97,23 @@ function MatchRow({
   match: MatchEntry;
   totalRounds: number;
   saving: boolean;
-  onSave: (matchId: number, homeScore: number, awayScore: number) => void;
+  onSave: (
+    matchId: number,
+    homeScore: number,
+    awayScore: number,
+    allowDraw: boolean
+  ) => void;
 }) {
+  const allowDraw = match.groupNumber != null;
   const [homeScore, setHomeScore] = useState(match.homeScore);
   const [awayScore, setAwayScore] = useState(match.awayScore);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-3 sm:p-4">
       <span className="text-xs text-muted-foreground font-medium shrink-0">
-        {getRoundLabel(match.round, totalRounds)}
+        {allowDraw && match.groupNumber != null
+          ? ka.match.groupTitle.replace("{n}", String(match.groupNumber))
+          : getRoundLabel(match.round, totalRounds)}
       </span>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 sm:flex-1 sm:justify-end">
@@ -132,7 +147,7 @@ function MatchRow({
         variant="outline"
         className="shrink-0 w-full sm:w-auto h-10"
         disabled={saving}
-        onClick={() => onSave(match.id, homeScore, awayScore)}
+        onClick={() => onSave(match.id, homeScore, awayScore, allowDraw)}
       >
         <Check className="h-4 w-4 sm:mr-1" />
         {saving ? "..." : ka.common.save}

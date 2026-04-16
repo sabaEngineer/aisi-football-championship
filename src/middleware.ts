@@ -9,7 +9,8 @@ const ADMIN_ONLY_PAGES = ["/championships/new", "/sponsors/new", "/staff/new"];
 const ADMIN_ONLY_API: { path: string; methods: string[]; matchSuffix?: string; matchContains?: string; excludeSuffix?: string }[] = [
   { path: "/api/championships", methods: ["POST"] },
   { path: "/api/championships/", methods: ["PATCH", "DELETE"] },
-  { path: "/api/championships/", matchSuffix: "/fixtures", methods: ["POST"] },
+  { path: "/api/championships/", matchSuffix: "/fixtures", methods: ["POST", "DELETE"] },
+  { path: "/api/championships/", matchSuffix: "/knockout", methods: ["POST"] },
   { path: "/api/championships/", matchSuffix: "/sponsors", methods: ["POST"] },
   { path: "/api/championships/", matchSuffix: "/nominations", methods: ["POST"] },
   { path: "/api/championships/", matchContains: "/nominations/", methods: ["PATCH", "DELETE"] },

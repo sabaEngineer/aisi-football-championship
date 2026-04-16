@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Shuffle, Trash2 } from "lucide-react";
+import { Settings, Shuffle, Trash2, Trophy } from "lucide-react";
 import { ka } from "@/lib/ka";
 
 interface Props {
@@ -18,6 +18,9 @@ interface Props {
   currentStatus: string;
   teamCount: number;
   hasMatches: boolean;
+  hasGroupStage: boolean;
+  groupsComplete: boolean;
+  hasKnockout: boolean;
 }
 
 export function ChampionshipSettings({
@@ -30,6 +33,9 @@ export function ChampionshipSettings({
   currentStatus,
   teamCount,
   hasMatches,
+  hasGroupStage,
+  groupsComplete,
+  hasKnockout,
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -37,6 +43,9 @@ export function ChampionshipSettings({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [clearingBracket, setClearingBracket] = useState(false);
+  const [groupCount, setGroupCount] = useState("");
+  const [generatingKnockout, setGeneratingKnockout] = useState(false);
 
   async function handleDelete() {
     if (!confirm(ka.settings.confirmDeleteChampionship)) return;
@@ -218,18 +227,40 @@ export function ChampionshipSettings({
           {ka.settings.bracketDesc}
           {hasMatches && ` ${ka.settings.bracketWillReplace}`}
         </p>
-        <div className="flex items-center gap-4">
+        <p className="text-xs text-muted-foreground">{ka.settings.groupCountHint}</p>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4 flex-wrap">
           <div className="text-sm">
             <span className="font-medium">{teamCount}</span> {ka.settings.teamsRegistered}
             {teamCount < 2 && (
               <span className="text-destructive ml-2">{ka.settings.needAtLeast2}</span>
             )}
           </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">{ka.settings.groupCountLabel}</label>
+            <Input
+              type="number"
+              min={1}
+              max={teamCount}
+              placeholder="4"
+              value={groupCount}
+              onChange={(e) => setGroupCount(e.target.value)}
+              className="w-24"
+            />
+          </div>
           <Button
             variant="default"
             className="bg-green-700 hover:bg-green-800"
             disabled={generating || teamCount < 2}
             onClick={async () => {
+              const gc = Number(groupCount);
+              if (!groupCount.trim() || !Number.isInteger(gc) || gc < 1) {
+                setError(ka.settings.groupCountInvalid);
+                return;
+              }
+              if (teamCount % gc !== 0) {
+                setError(ka.settings.groupCountNotDivisor.replace("{n}", String(teamCount)));
+                return;
+              }
               if (hasMatches && !confirm(ka.settings.confirmRedraw)) return;
               setGenerating(true);
               setError("");
@@ -237,12 +268,19 @@ export function ChampionshipSettings({
               try {
                 const res = await fetch(`/api/championships/${championshipId}/fixtures`, {
                   method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ groupCount: gc }),
                 });
                 const data = await res.json();
                 if (!data.success) {
                   setError(data.error);
                 } else {
-                  setSuccess(ka.settings.bracketGenerated.replace("{matches}", data.data.count).replace("{rounds}", data.data.rounds));
+                  setSuccess(
+                    ka.settings.bracketGeneratedGroups
+                      .replace("{matches}", String(data.data.count))
+                      .replace("{groups}", String(data.data.groupCount))
+                      .replace("{perGroup}", String(data.data.teamsPerGroup))
+                  );
                   router.refresh();
                 }
               } catch {
@@ -254,9 +292,100 @@ export function ChampionshipSettings({
             <Shuffle className="h-4 w-4 mr-2" />
             {generating ? ka.settings.generating : hasMatches ? ka.settings.redrawBracket : ka.settings.drawBracket}
           </Button>
+          {hasMatches && (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-destructive text-destructive hover:bg-destructive/10"
+              disabled={clearingBracket || generating}
+              onClick={async () => {
+                if (!confirm(ka.settings.confirmDeleteBracket)) return;
+                setClearingBracket(true);
+                setError("");
+                setSuccess("");
+                try {
+                  const res = await fetch(`/api/championships/${championshipId}/fixtures`, {
+                    method: "DELETE",
+                  });
+                  const data = await res.json();
+                  if (!data.success) {
+                    setError(data.error);
+                  } else {
+                    setSuccess(ka.settings.bracketDeleted);
+                    router.refresh();
+                  }
+                } catch {
+                  setError(ka.settings.failedGenerate);
+                }
+                setClearingBracket(false);
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {clearingBracket ? ka.common.saving : ka.settings.deleteBracket}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
+
+    {hasGroupStage && (
+      <Card className="border-yellow-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-600" />
+            {ka.settings.knockoutTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {ka.settings.knockoutDesc}
+          </p>
+          {!groupsComplete && (
+            <p className="text-sm text-amber-600 font-medium">
+              {ka.settings.groupsNotComplete}
+            </p>
+          )}
+          <Button
+            variant="default"
+            className="bg-yellow-600 hover:bg-yellow-700"
+            disabled={!groupsComplete || generatingKnockout}
+            onClick={async () => {
+              if (hasKnockout && !confirm(ka.settings.confirmRedraw)) return;
+              setGeneratingKnockout(true);
+              setError("");
+              setSuccess("");
+              try {
+                const res = await fetch(`/api/championships/${championshipId}/knockout`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                });
+                const data = await res.json();
+                if (!data.success) {
+                  setError(data.error);
+                } else {
+                  setSuccess(
+                    ka.settings.knockoutGenerated
+                      .replace("{matches}", String(data.data.count))
+                      .replace("{rounds}", String(data.data.rounds))
+                  );
+                  router.refresh();
+                }
+              } catch {
+                setError(ka.settings.failedGenerate);
+              }
+              setGeneratingKnockout(false);
+            }}
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            {generatingKnockout
+              ? ka.settings.generatingKnockout
+              : hasKnockout
+                ? ka.settings.redrawBracket
+                : ka.settings.generateKnockout}
+          </Button>
+        </CardContent>
+      </Card>
+    )}
     </>
   );
 }

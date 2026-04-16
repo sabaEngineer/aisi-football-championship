@@ -65,89 +65,213 @@ export const matchService = {
     return prisma.match.delete({ where: { id } });
   },
 
+  /** Remove all matches (ბადე) for a championship. Does not touch teams or users. */
+  async clearChampionshipFixtures(championshipId: number) {
+    const deleted = await prisma.match.deleteMany({ where: { championshipId } });
+    return { deleted: deleted.count };
+  },
+
   /**
-   * Generate knockout tournament bracket for a championship.
-   * Randomly seeds teams, creates all rounds up to the final.
-   * If team count isn't a power of 2, some teams get first-round byes.
+   * Group stage: admin picks number of groups. Teams are split randomly into equal groups.
+   * Within each group, round-robin (every pair plays once). Points decide standings; no auto knockout from this step.
    */
-  async generateFixtures(championshipId: number) {
+  async generateFixtures(championshipId: number, groupCount: number) {
     const championship = await prisma.championship.findUnique({
       where: { id: championshipId },
-      include: { teams: true },
+      include: {
+        teams: {
+          where: { members: { some: { status: { not: "LEFT" } } } },
+        },
+      },
     });
     if (!championship) throw new Error("Championship not found");
 
     const teams = championship.teams;
-    if (teams.length < 2) throw new Error("Need at least 2 teams to generate fixtures");
+    if (teams.length < 2) {
+      throw new Error("Need at least 2 teams with players to generate fixtures");
+    }
+    if (groupCount < 1) throw new Error("Need at least 1 group");
+    if (teams.length % groupCount !== 0) {
+      throw new Error(
+        `Team count (${teams.length}) must be divisible by number of groups (${groupCount})`
+      );
+    }
+
+    const teamsPerGroup = teams.length / groupCount;
+    if (teamsPerGroup < 2) throw new Error("Each group needs at least 2 teams");
 
     await prisma.match.deleteMany({ where: { championshipId } });
 
-    const n = teams.length;
-    const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
-    const totalRounds = Math.log2(bracketSize);
-
-    // Shuffle teams randomly for seeding
     const shuffled = [...teams].sort(() => Math.random() - 0.5);
+    let position = 1;
+    let totalCreated = 0;
 
-    // Place teams into bracket slots; remaining slots are byes (null)
-    const seeds: (number | null)[] = Array(bracketSize).fill(null);
-    for (let i = 0; i < shuffled.length; i++) {
-      seeds[i] = shuffled[i].id;
+    for (let g = 1; g <= groupCount; g++) {
+      const start = (g - 1) * teamsPerGroup;
+      const groupTeams = shuffled.slice(start, start + teamsPerGroup);
+
+      for (let i = 0; i < groupTeams.length; i++) {
+        for (let j = i + 1; j < groupTeams.length; j++) {
+          const homeFirst = Math.random() < 0.5;
+          const homeTeamId = homeFirst ? groupTeams[i].id : groupTeams[j].id;
+          const awayTeamId = homeFirst ? groupTeams[j].id : groupTeams[i].id;
+
+          await prisma.match.create({
+            data: {
+              championshipId,
+              round: 1,
+              bracketPosition: position++,
+              groupNumber: g,
+              homeTeamId,
+              awayTeamId,
+              status: "SCHEDULED",
+            },
+          });
+          totalCreated++;
+        }
+      }
     }
 
-    // Create all matches for all rounds
-    const matchMap: { round: number; position: number; matchId?: number }[] = [];
+    return {
+      count: totalCreated,
+      rounds: 1,
+      groupCount,
+      teamsPerGroup,
+    };
+  },
+
+  /**
+   * After group stage is complete, generate a single-elimination knockout bracket
+   * from the top team of each group (by points → goal diff → goals scored).
+   * If group winners are not a power of 2, higher-seeded teams get BYEs.
+   */
+  async generateKnockout(championshipId: number) {
+    const groupMatches = await prisma.match.findMany({
+      where: { championshipId, groupNumber: { not: null } },
+    });
+    if (groupMatches.length === 0) {
+      throw new Error("No group stage matches found");
+    }
+    const incomplete = groupMatches.filter((m) => m.status !== "COMPLETED");
+    if (incomplete.length > 0) {
+      throw new Error(
+        `${incomplete.length} group match(es) not completed yet`
+      );
+    }
+
+    const existingKnockout = await prisma.match.findFirst({
+      where: { championshipId, groupNumber: null },
+    });
+    if (existingKnockout) {
+      await prisma.match.deleteMany({
+        where: { championshipId, groupNumber: null },
+      });
+    }
+
+    type Standing = {
+      teamId: number;
+      group: number;
+      points: number;
+      goalDiff: number;
+      goalsFor: number;
+    };
+    const map = new Map<number, Standing>();
+
+    for (const m of groupMatches) {
+      if (!m.homeTeamId || !m.awayTeamId) continue;
+      for (const tid of [m.homeTeamId, m.awayTeamId]) {
+        if (!map.has(tid)) {
+          map.set(tid, { teamId: tid, group: m.groupNumber!, points: 0, goalDiff: 0, goalsFor: 0 });
+        }
+      }
+      const home = map.get(m.homeTeamId)!;
+      const away = map.get(m.awayTeamId)!;
+      home.goalsFor += m.homeScore;
+      home.goalDiff += m.homeScore - m.awayScore;
+      away.goalsFor += m.awayScore;
+      away.goalDiff += m.awayScore - m.homeScore;
+      if (m.homeScore > m.awayScore) {
+        home.points += 3;
+      } else if (m.homeScore < m.awayScore) {
+        away.points += 3;
+      } else {
+        home.points += 1;
+        away.points += 1;
+      }
+    }
+
+    const groups = new Map<number, Standing[]>();
+    for (const s of map.values()) {
+      if (!groups.has(s.group)) groups.set(s.group, []);
+      groups.get(s.group)!.push(s);
+    }
+    for (const arr of groups.values()) {
+      arr.sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
+    }
+
+    const groupWinners = [...groups.keys()]
+      .sort((a, b) => a - b)
+      .map((g) => groups.get(g)![0]);
+
+    const n = groupWinners.length;
+    if (n < 2) throw new Error("Need at least 2 group winners for knockout");
+
+    const bracketSize = Math.pow(2, Math.ceil(Math.log2(n)));
+    const totalRounds = Math.ceil(Math.log2(bracketSize));
+
+    const seeds: (number | null)[] = Array(bracketSize).fill(null);
+    for (let i = 0; i < n; i++) {
+      seeds[i] = groupWinners[i].teamId;
+    }
+
+    let position = 1;
+    let totalCreated = 0;
 
     for (let round = 1; round <= totalRounds; round++) {
       const matchesInRound = bracketSize / Math.pow(2, round);
-      for (let pos = 1; pos <= matchesInRound; pos++) {
-        matchMap.push({ round, position: pos });
+      for (let i = 0; i < matchesInRound; i++) {
+        const homeTeamId =
+          round === 1 ? seeds[i * 2] ?? null : null;
+        const awayTeamId =
+          round === 1 ? seeds[i * 2 + 1] ?? null : null;
+
+        const isBye =
+          round === 1 &&
+          ((homeTeamId !== null && awayTeamId === null) ||
+            (homeTeamId === null && awayTeamId !== null));
+
+        await prisma.match.create({
+          data: {
+            championshipId,
+            round,
+            bracketPosition: position++,
+            groupNumber: null,
+            homeTeamId,
+            awayTeamId,
+            status: isBye ? "COMPLETED" : "SCHEDULED",
+            winnerId: isBye ? (homeTeamId ?? awayTeamId) : null,
+          },
+        });
+        totalCreated++;
       }
     }
 
-    // Create match records in DB
-    const createdMatches = [];
-    for (const m of matchMap) {
-      const created = await prisma.match.create({
-        data: {
-          championshipId,
-          round: m.round,
-          bracketPosition: m.position,
-          homeTeamId: null,
-          awayTeamId: null,
-          status: "SCHEDULED",
-        },
-      });
-      createdMatches.push({ ...m, matchId: created.id });
-    }
-
-    // Fill round 1 matches with seeded teams and resolve byes
-    const round1 = createdMatches.filter((m) => m.round === 1);
-    for (const match of round1) {
-      const idx = (match.position - 1) * 2;
-      const homeTeamId = seeds[idx] ?? null;
-      const awayTeamId = seeds[idx + 1] ?? null;
-
-      const isBye = homeTeamId === null || awayTeamId === null;
-      const byeWinner = homeTeamId ?? awayTeamId;
-
-      await prisma.match.update({
-        where: { id: match.matchId },
-        data: {
-          homeTeamId,
-          awayTeamId,
-          winnerId: isBye ? byeWinner : null,
-          status: isBye ? "COMPLETED" : "SCHEDULED",
-        },
-      });
-
-      // If bye, advance winner to next round
-      if (isBye && byeWinner !== null) {
-        await this.advanceWinner(createdMatches, match.round, match.position, byeWinner);
+    const allKnockout = await prisma.match.findMany({
+      where: { championshipId, groupNumber: null },
+      select: { id: true, round: true, bracketPosition: true, winnerId: true },
+    });
+    const mapped = allKnockout.map((m) => ({
+      round: m.round!,
+      position: m.bracketPosition!,
+      matchId: m.id,
+    }));
+    for (const m of allKnockout) {
+      if (m.winnerId) {
+        await this.advanceWinner(mapped, m.round!, m.bracketPosition!, m.winnerId);
       }
     }
 
-    return { count: createdMatches.length, rounds: totalRounds };
+    return { count: totalCreated, rounds: totalRounds, bracketSize };
   },
 
   /**
@@ -179,8 +303,26 @@ export const matchService = {
    */
   async resolveMatchResult(matchId: number) {
     const match = await prisma.match.findUnique({ where: { id: matchId } });
-    if (!match || match.status !== "COMPLETED" || match.winnerId) return;
+    if (!match || match.status !== "COMPLETED") return;
     if (match.homeTeamId === null || match.awayTeamId === null) return;
+
+    // Group stage: record winner for standings; draws allowed; no bracket advance
+    if (match.groupNumber !== null) {
+      const draw = match.homeScore === match.awayScore;
+      await prisma.match.update({
+        where: { id: matchId },
+        data: {
+          winnerId: draw
+            ? null
+            : match.homeScore > match.awayScore
+              ? match.homeTeamId
+              : match.awayTeamId,
+        },
+      });
+      return;
+    }
+
+    if (match.winnerId) return;
 
     const winnerId =
       match.homeScore > match.awayScore ? match.homeTeamId : match.awayTeamId;
@@ -190,7 +332,6 @@ export const matchService = {
       data: { winnerId },
     });
 
-    // Find all matches in this championship to locate the next bracket slot
     const allMatches = await prisma.match.findMany({
       where: { championshipId: match.championshipId },
       select: { id: true, round: true, bracketPosition: true },

@@ -42,6 +42,7 @@ export default async function ChampionshipTeamsTab({
 
   // Sort teams by member count (more full first)
   const teams = [...championship.teams].sort((a, b) => b.members.length - a.members.length);
+  const teamsWithPlayers = teams.filter((t) => t.members.length > 0).length;
 
   const isAdmin = session?.role === "ADMIN";
   const isPlayer = session?.role === "PLAYER";
@@ -89,7 +90,7 @@ export default async function ChampionshipTeamsTab({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>
-          {`${ka.tabs.teams} (${teams.length} / ${championship.maxTeams})`}
+          {`${ka.tabs.teams} (${teamsWithPlayers} / ${championship.maxTeams})`}
         </CardTitle>
         {isAdmin && teams.length < championship.maxTeams && (
           <Link href={`/teams/new?championshipId=${championship.id}`}>

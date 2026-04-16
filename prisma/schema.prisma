@@ -162,6 +162,7 @@ model Match {
   locationUrl     String?
   description     String?
   status          MatchStatus @default(SCHEDULED)
+  groupNumber     Int?        // null = knockout; 1..N = group stage round-robin
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

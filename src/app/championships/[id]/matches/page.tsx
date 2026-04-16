@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TournamentBracket } from "@/components/tournament-bracket";
+import { GroupStageBracket } from "@/components/group-stage-bracket";
 import { CalendarModalTrigger } from "@/components/calendar-modal-trigger";
 import { MatchScoreEntry } from "./match-score-entry";
 import { ka } from "@/lib/ka";
@@ -51,9 +52,32 @@ export default async function ChampionshipMatchesTab({
     );
   }
 
-  const totalRounds = Math.max(...matches.map((m) => m.round ?? 0));
+  const groupRawMatches = matches.filter((m) => m.groupNumber != null);
+  const knockoutRawMatches = matches.filter((m) => m.groupNumber === null);
 
-  const bracketMatches = matches.map((m) => ({
+  const hasGroupStage = groupRawMatches.length > 0;
+  const hasKnockout = knockoutRawMatches.length > 0;
+
+  const knockoutTotalRounds = hasKnockout
+    ? Math.max(...knockoutRawMatches.map((m) => m.round ?? 0))
+    : 0;
+  const totalRounds = hasKnockout
+    ? knockoutTotalRounds
+    : Math.max(...matches.map((m) => m.round ?? 0));
+
+  const knockoutBracketMatches = knockoutRawMatches.map((m) => ({
+    id: m.id,
+    round: m.round ?? 1,
+    bracketPosition: m.bracketPosition ?? 1,
+    homeTeam: m.homeTeam ? { id: m.homeTeam.id, name: m.homeTeam.name } : null,
+    awayTeam: m.awayTeam ? { id: m.awayTeam.id, name: m.awayTeam.name } : null,
+    homeScore: m.homeScore,
+    awayScore: m.awayScore,
+    winnerId: m.winnerId,
+    status: m.status,
+  }));
+
+  const allBracketMatches = matches.map((m) => ({
     id: m.id,
     round: m.round ?? 1,
     bracketPosition: m.bracketPosition ?? 1,
@@ -72,6 +96,20 @@ export default async function ChampionshipMatchesTab({
       m.status !== "COMPLETED" &&
       !(m.homeTeam === null && m.awayTeam === null)
   );
+
+  const groupStageMatches = hasGroupStage
+    ? groupRawMatches.map((m) => ({
+          id: m.id,
+          groupNumber: m.groupNumber!,
+          bracketPosition: m.bracketPosition ?? 0,
+          homeTeam: m.homeTeam ? { id: m.homeTeam.id, name: m.homeTeam.name } : null,
+          awayTeam: m.awayTeam ? { id: m.awayTeam.id, name: m.awayTeam.name } : null,
+          homeScore: m.homeScore,
+          awayScore: m.awayScore,
+          winnerId: m.winnerId,
+          status: m.status,
+        }))
+    : [];
 
   function getRoundLabel(round: number, totalRounds: number): string {
     const fromFinal = totalRounds - round;
@@ -103,14 +141,38 @@ export default async function ChampionshipMatchesTab({
         </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{ka.match.tournamentBracket}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TournamentBracket matches={bracketMatches} totalRounds={totalRounds} isAdmin={isAdmin} />
-        </CardContent>
-      </Card>
+      {hasGroupStage && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{ka.match.groupStageTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <GroupStageBracket matches={groupStageMatches} />
+          </CardContent>
+        </Card>
+      )}
+
+      {hasKnockout && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{ka.settings.knockoutTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TournamentBracket matches={knockoutBracketMatches} totalRounds={knockoutTotalRounds} isAdmin={isAdmin} />
+          </CardContent>
+        </Card>
+      )}
+
+      {!hasGroupStage && !hasKnockout && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{ka.match.tournamentBracket}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TournamentBracket matches={allBracketMatches} totalRounds={totalRounds} isAdmin={isAdmin} />
+          </CardContent>
+        </Card>
+      )}
 
       {isAdmin && playableMatches.length > 0 && (
         <Card>
@@ -127,6 +189,7 @@ export default async function ChampionshipMatchesTab({
                 homeScore: m.homeScore,
                 awayScore: m.awayScore,
                 status: m.status,
+                groupNumber: m.groupNumber,
               }))}
               totalRounds={totalRounds}
             />
